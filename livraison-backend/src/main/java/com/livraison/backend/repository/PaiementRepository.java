@@ -1,0 +1,14 @@
+package com.livraison.backend.repository;
+
+import com.livraison.backend.entity.Colis;
+import com.livraison.backend.entity.Paiement;
+import com.livraison.backend.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface PaiementRepository extends JpaRepository<Paiement, UUID> {
+    boolean existsByColis(Colis colis);
+    List<Paiement> findByPayeur(User payeur);
+}

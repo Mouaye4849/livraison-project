@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Tailwind v4: enable class-based dark mode */
+@variant dark (&:where(.dark, .dark *));
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ─── Smooth theme transition ─────────────────────────────────────────────── */
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition:
+    background-color 0.25s ease,
+    border-color     0.25s ease,
+    color            0.20s ease,
+    box-shadow       0.25s ease !important;
+  transition-delay: 0s !important;
+}
+
+/* ─── Dropdown animation ──────────────────────────────────────────────────── */
+@keyframes dropdownIn {
+  from { opacity: 0; transform: scale(0.96) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+.dropdown-enter {
+  animation: dropdownIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+}
+
+/* ─── Original fade-in animation ─────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
