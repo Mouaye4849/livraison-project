@@ -18,6 +18,7 @@ import MyPayments from "./pages/MyPayments";
 import Pay from "./pages/Pay";
 import ChatPage from "./pages/ChatPage";
 import MessagesPage from "./pages/MessagesPage";
+import TrackingPage from "./pages/TrackingPage";
 
 // 🛡 ADMIN (desktop)
 import AdminRoute from "./components/AdminRoute";
@@ -73,6 +74,7 @@ function App() {
           <Route path="pay/:colisId" element={<Pay />} />
           <Route path="chat/:colisId" element={<ChatPage />} />
           <Route path="messages" element={<MessagesPage />} />
+          <Route path="tracking/:colisId" element={<TrackingPage />} />
         </Route>
 
         {/* =============================

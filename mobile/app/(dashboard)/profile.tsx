@@ -19,23 +19,25 @@ import type { StoredUser, Colis } from '@/types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:     '#0a0a0a',
-  card:   '#141414',
-  card2:  '#1a1a1a',
-  bd:     'rgba(255,255,255,0.07)',
-  bd2:    'rgba(255,255,255,0.04)',
-  red:    '#dc2626',
-  redDk:  '#b91c1c',
-  redDim: 'rgba(220,38,38,0.12)',
-  wh:     '#ffffff',
-  gr:     '#9ca3af',
-  dim:    '#4b5563',
-  grn:    '#22c55e',
-  grnDim: 'rgba(34,197,94,0.12)',
-  ylw:    '#facc15',
-  ylwDim: 'rgba(250,204,21,0.12)',
-  blu:    '#3b82f6',
-  bluDim: 'rgba(59,130,246,0.12)',
+  bg:      '#eef1ee',
+  card:    '#ffffff',
+  card2:   '#f5f8f5',
+  bd:      'rgba(0,0,0,0.08)',
+  bd2:     'rgba(0,0,0,0.04)',
+  grn:     '#22c55e',
+  grnDk:   '#166534',
+  grnMid:  '#16a34a',
+  grnDim:  'rgba(34,197,94,0.12)',
+  grnBd:   'rgba(34,197,94,0.25)',
+  wh:      '#1a2e1a',
+  gr:      '#6b7280',
+  dim:     '#9ca3af',
+  red:     '#dc2626',
+  redDim:  'rgba(220,38,38,0.10)',
+  ylw:     '#d97706',
+  ylwDim:  'rgba(217,119,6,0.10)',
+  blu:     '#2563eb',
+  bluDim:  'rgba(37,99,235,0.10)',
 } as const;
 
 const ROLE_CFG: Record<string, { label: string; color: string; bg: string }> = {
@@ -56,7 +58,7 @@ interface MenuItem {
 function MenuRow({ item }: { item: MenuItem }) {
   return (
     <TouchableOpacity style={S.menuRow} activeOpacity={0.72} onPress={item.onPress}>
-      <View style={[S.menuIconWrap, { backgroundColor: item.danger ? 'rgba(220,38,38,0.10)' : C.bd2 }]}>
+      <View style={[S.menuIconWrap, { backgroundColor: item.danger ? 'rgba(248,81,73,0.10)' : C.bd2 }]}>
         <Ionicons
           name={item.icon as any}
           size={19}
@@ -115,8 +117,8 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <View style={[S.root, { alignItems: 'center', justifyContent: 'center' }]}>
-        <StatusBar style="light" />
-        <ActivityIndicator color={C.red} size="large" />
+        <StatusBar style="dark" />
+        <ActivityIndicator color={C.grn} size="large" />
       </View>
     );
   }
@@ -182,7 +184,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={S.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={S.scroll}>
 
         {/* ── HERO HEADER ─────────────────────────────────── */}
@@ -228,7 +230,7 @@ export default function ProfileScreen() {
           </View>
           <View style={S.statSep} />
           <View style={S.statItem}>
-            <Text style={[S.statVal, { color: C.red }]}>{activeColis}</Text>
+            <Text style={[S.statVal, { color: C.ylw }]}>{activeColis}</Text>
             <Text style={S.statLbl}>Actifs</Text>
           </View>
           <View style={S.statSep} />
@@ -266,12 +268,12 @@ const S = StyleSheet.create({
 
   // ── Hero header
   hero: {
-    backgroundColor: C.red,
+    backgroundColor: '#0d2818',
     paddingBottom: 32,
     alignItems: 'center',
     overflow: 'hidden',
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.45, shadowRadius: 24 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.55, shadowRadius: 24 },
       android: { elevation: 16 },
     }),
   },
@@ -282,7 +284,7 @@ const S = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(74,222,128,0.10)',
   },
   blobBR: {
     position: 'absolute',
@@ -291,7 +293,7 @@ const S = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: 'rgba(0,0,0,0.16)',
+    backgroundColor: 'rgba(22,101,52,0.35)',
   },
   blobCenter: {
     position: 'absolute',
@@ -300,7 +302,7 @@ const S = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(74,222,128,0.06)',
   },
   heroSafe:    { width: '100%' },
   heroActions: {
@@ -322,8 +324,8 @@ const S = StyleSheet.create({
     width: 98,
     height: 98,
     borderRadius: 49,
-    borderWidth: 4,
-    borderColor: 'rgba(255,255,255,0.35)',
+    borderWidth: 3,
+    borderColor: 'rgba(74,222,128,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
@@ -332,15 +334,15 @@ const S = StyleSheet.create({
     width: 86,
     height: 86,
     borderRadius: 43,
-    backgroundColor: C.redDk,
+    backgroundColor: C.grnDk,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroAvatarTxt: { color: C.wh, fontSize: 32, fontWeight: '800' },
-  heroName:      { color: C.wh, fontSize: 22, fontWeight: '800', marginBottom: 4, letterSpacing: -0.3 },
+  heroAvatarTxt: { color: '#f0f6fc', fontSize: 32, fontWeight: '800' },
+  heroName:      { color: '#f0f6fc', fontSize: 22, fontWeight: '800', marginBottom: 4, letterSpacing: -0.3 },
   heroEmail:     { color: 'rgba(255,255,255,0.68)', fontSize: 13, marginBottom: 14 },
   heroBadge:     { borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
-  heroBadgeTxt:  { color: C.wh, fontSize: 12, fontWeight: '700' },
+  heroBadgeTxt:  { color: '#f0f6fc', fontSize: 12, fontWeight: '700' },
 
   // ── Stats strip
   statsStrip: {
@@ -402,7 +404,7 @@ const S = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  menuDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.04)', marginLeft: 72 },
+  menuDivider: { height: 1, backgroundColor: 'rgba(0,0,0,0.06)', marginLeft: 72 },
 
   // ── Footer
   footer:      { alignItems: 'center', gap: 5, paddingBottom: 8 },

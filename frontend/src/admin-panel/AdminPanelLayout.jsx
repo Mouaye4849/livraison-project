@@ -1,28 +1,32 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LayoutGrid, Package, Users, Plane } from "lucide-react";
+import { useI18n } from "../i18n";
 
 const C = {
-  bg:    "#08080a",
-  bar:   "#0d0d0f",
-  bd:    "rgba(255,255,255,0.07)",
-  blu:   "#3b82f6",
-  gray:  "#4b5563",
-  wh:    "#ffffff",
+  bg: "#08080a",
+  bar: "#0d0d0f",
+  bd: "rgba(255,255,255,0.07)",
+  blu: "#3b82f6",
+  gray: "#4b5563",
+  wh: "#ffffff",
 };
 
-const TABS = [
-  { path: "/m-admin",         label: "Tableau",  Icon: LayoutGrid },
-  { path: "/m-admin/colis",   label: "Colis",    Icon: Package    },
-  { path: "/m-admin/trajets", label: "Trajets",  Icon: Plane      },
-  { path: "/m-admin/users",   label: "Comptes",  Icon: Users      },
-];
+
 
 export default function AdminPanelLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const active = (path) =>
     path === "/m-admin" ? pathname === "/m-admin" : pathname.startsWith(path);
+
+  const TABS = [
+    { path: "/m-admin", label: "Tableau", Icon: LayoutGrid },
+    { path: "/m-admin/colis", label: t("admin.allColis"), Icon: Package },
+    { path: "/m-admin/trajets", label: t("admin.trajets"), Icon: Plane },
+    { path: "/m-admin/users", label: t("admin.users"), Icon: Users },
+  ];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100dvh", background: C.bg, maxWidth: 480, margin: "0 auto", position: "relative" }}>

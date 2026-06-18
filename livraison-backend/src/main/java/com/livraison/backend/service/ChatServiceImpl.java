@@ -5,7 +5,7 @@ import com.livraison.backend.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ChatMessage save(ChatMessage msg) {
-        msg.setTimestamp(new Date());
+        msg.setCreatedAt(LocalDateTime.now());
         return repo.save(msg);
     }
 

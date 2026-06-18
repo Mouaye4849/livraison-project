@@ -10,8 +10,10 @@ import {
     ArrowRight,
     ShieldOff,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 export default function AssignColis() {
+    const { t } = useI18n();
 
     const [colis, setColis] = useState([]);
     const [trajets, setTrajets] = useState([]);
@@ -39,7 +41,7 @@ export default function AssignColis() {
             setTrajets(res.data);
         } catch (err) {
             console.error(err);
-            setMessage({ type: "error", text: "Erreur chargement trajets ❌" });
+            setMessage({ type: "error", text: t("assignColis.loadTrajetsError") });
         } finally {
             setLoading(false);
         }
@@ -52,7 +54,7 @@ export default function AssignColis() {
             setColis(res.data);
         } catch (err) {
             console.error(err);
-            setMessage({ type: "error", text: "Erreur chargement colis ❌" });
+            setMessage({ type: "error", text: t("assignColis.loadColisError") });
         } finally {
             setLoading(false);
         }
@@ -60,21 +62,21 @@ export default function AssignColis() {
 
     const handleAssign = async () => {
         if (!colisId || !trajetId) {
-            return setMessage({ type: "error", text: "Veuillez sélectionner colis et trajet ❌" });
+            return setMessage({ type: "error", text: t("assignColis.selectBothError") });
         }
 
         try {
             setProcessing(true);
             setMessage(null);
             await api.put(`/colis/${colisId}/assign/${trajetId}`);
-            setMessage({ type: "success", text: "Colis assigné avec succès ✅" });
+            setMessage({ type: "success", text: t("assignColis.assignSuccess") });
             setColisId("");
             setTrajetId("");
             setColis([]);
             fetchTrajets();
         } catch (err) {
             console.error(err);
-            setMessage({ type: "error", text: err.response?.data || "Erreur serveur ❌" });
+            setMessage({ type: "error", text: err.response?.data || t("assignColis.serverError") });
         } finally {
             setProcessing(false);
         }
@@ -84,7 +86,7 @@ export default function AssignColis() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 size={28} className="animate-spin text-[#1e3a8a]" />
-                <p className="text-gray-500 text-sm">Chargement...</p>
+                <p className="text-gray-500 text-sm">{t("assignColis.loading")}</p>
             </div>
         );
     }
@@ -97,8 +99,8 @@ export default function AssignColis() {
                         <ShieldOff size={22} className="text-red-400" />
                     </div>
                     <div>
-                        <p className="dark:text-white text-gray-900 font-semibold text-base">Accès refusé</p>
-                        <p className="text-gray-500 text-sm mt-1">Cette page est réservée aux voyageurs</p>
+                        <p className="dark:text-white text-gray-900 font-semibold text-base">{t("assignColis.accessDenied")}</p>
+                        <p className="text-gray-500 text-sm mt-1">{t("assignColis.accessDeniedDesc")}</p>
                     </div>
                 </div>
             </div>
@@ -139,10 +141,10 @@ export default function AssignColis() {
                 </div>
                 <div>
                     <h2 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">
-                        Assignation des colis
+                        {t("assignColis.title")}
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        Gérez les colis et les trajets disponibles
+                        {t("assignColis.subtitle")}
                     </p>
                 </div>
             </div>
@@ -151,7 +153,7 @@ export default function AssignColis() {
             <div className="grid grid-cols-2 gap-4">
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-[#1e3a8a] transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Trajets disponibles</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("assignColis.statTrajetsAvailable")}</p>
                         <div className="w-8 h-8 rounded-lg bg-[#1e3a8a]/20 flex items-center justify-center">
                             <Truck size={15} className="text-blue-400" />
                         </div>
@@ -160,7 +162,7 @@ export default function AssignColis() {
                 </div>
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-[#1e3a8a] transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Colis compatibles</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("assignColis.statCompatibleColis")}</p>
                         <div className="w-8 h-8 rounded-lg bg-[#f97316]/10 flex items-center justify-center">
                             <Package size={15} className="text-[#f97316]" />
                         </div>
@@ -191,7 +193,7 @@ export default function AssignColis() {
                 <div className="space-y-2">
                     <div className="flex items-center gap-2">
                         <MapPin size={13} className="text-[#f97316]" />
-                        <label className="text-sm font-medium text-gray-400">Choisir un trajet</label>
+                        <label className="text-sm font-medium text-gray-400">{t("assignColis.chooseTrajet")}</label>
                     </div>
                     <select
                         value={trajetId}
@@ -204,22 +206,22 @@ export default function AssignColis() {
                         }}
                         className="assign-select"
                     >
-                        <option value="">Sélectionner un trajet...</option>
-                        {trajets.map((t) => (
-                            <option key={t.id} value={t.id}>
-                                {t.origine} → {t.destination}
+                        <option value="">{t("assignColis.selectTrajetPlaceholder")}</option>
+                        {trajets.map((trj) => (
+                            <option key={trj.id} value={trj.id}>
+                                {trj.origine} → {trj.destination}
                             </option>
                         ))}
                     </select>
 
                     {trajetId && (() => {
-                        const t = trajets.find(x => x.id === trajetId);
-                        return t ? (
+                        const trj = trajets.find(x => x.id === trajetId);
+                        return trj ? (
                             <div className="flex items-center gap-2 px-3 py-2 dark:bg-[#0f0f0f] bg-gray-50 dark:border-[#1f1f1f] border-gray-200 border rounded-xl">
                                 <MapPin size={12} className="text-[#f97316] shrink-0" />
-                                <span className="dark:text-white text-gray-900 text-sm font-medium">{t.origine}</span>
+                                <span className="dark:text-white text-gray-900 text-sm font-medium">{trj.origine}</span>
                                 <ArrowRight size={11} className="text-gray-400 shrink-0" />
-                                <span className="dark:text-white text-gray-900 text-sm font-medium">{t.destination}</span>
+                                <span className="dark:text-white text-gray-900 text-sm font-medium">{trj.destination}</span>
                             </div>
                         ) : null;
                     })()}
@@ -232,7 +234,7 @@ export default function AssignColis() {
                 <div className="space-y-2">
                     <div className="flex items-center gap-2">
                         <Package size={13} className="text-blue-400" />
-                        <label className="text-sm font-medium text-gray-400">Choisir un colis</label>
+                        <label className="text-sm font-medium text-gray-400">{t("assignColis.chooseColis")}</label>
                     </div>
                     <select
                         value={colisId}
@@ -241,7 +243,7 @@ export default function AssignColis() {
                         className="assign-select"
                     >
                         <option value="">
-                            {trajetId ? "Sélectionner un colis..." : "Choisissez d'abord un trajet"}
+                            {trajetId ? t("assignColis.selectColisPlaceholder") : t("assignColis.selectTrajetFirst")}
                         </option>
 
                         {colis.map((c) => (
@@ -255,7 +257,7 @@ export default function AssignColis() {
                         <div className="flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
                             <AlertCircle size={13} className="text-yellow-400 shrink-0" />
                             <p className="text-yellow-400 text-xs font-medium">
-                                Aucun colis compatible avec ce trajet
+                                {t("assignColis.noCompatibleColis")}
                             </p>
                         </div>
                     )}
@@ -276,7 +278,7 @@ export default function AssignColis() {
                     ) : (
                         <CheckCircle size={16} />
                     )}
-                    {processing ? "Assignation en cours..." : "Assigner le colis"}
+                    {processing ? t("assignColis.assigning") : t("assignColis.assign")}
                 </button>
 
             </div>

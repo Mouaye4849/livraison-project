@@ -26,22 +26,24 @@ import type { Colis, ColisRequest, Trajet, ApiError } from '@/types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:     '#0a0a0a',
-  card:   '#141414',
-  input:  '#1a1a1a',
-  bd:     'rgba(255,255,255,0.07)',
-  bdFoc:  'rgba(220,38,38,0.45)',
-  red:    '#dc2626',
-  redDim: 'rgba(220,38,38,0.12)',
-  wh:     '#ffffff',
-  gr:     '#9ca3af',
-  dim:    '#4b5563',
+  bg:     '#eef1ee',
+  card:   '#ffffff',
+  input:  '#f0f4f0',
+  bd:     'rgba(0,0,0,0.08)',
+  bdFoc:  'rgba(34,197,94,0.50)',
   grn:    '#22c55e',
-  grnDim: 'rgba(34,197,94,0.13)',
-  ylw:    '#facc15',
-  ylwDim: 'rgba(250,204,21,0.13)',
-  blu:    '#3b82f6',
-  bluDim: 'rgba(59,130,246,0.13)',
+  grnDk:  '#166534',
+  grnDim: 'rgba(34,197,94,0.12)',
+  grnBd:  'rgba(34,197,94,0.25)',
+  wh:     '#1a2e1a',
+  gr:     '#6b7280',
+  dim:    '#9ca3af',
+  red:    '#dc2626',
+  redDim: 'rgba(220,38,38,0.10)',
+  ylw:    '#d97706',
+  ylwDim: 'rgba(217,119,6,0.10)',
+  blu:    '#2563eb',
+  bluDim: 'rgba(37,99,235,0.10)',
 } as const;
 
 const STATUT_CFG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
@@ -51,7 +53,7 @@ const STATUT_CFG: Record<string, { label: string; color: string; bg: string; ico
   EN_COURS:  { label: 'En cours', color: C.red,   bg: C.redDim,                icon: 'bicycle-outline'         },
   LIVRE:     { label: 'Livré',    color: C.grn,   bg: C.grnDim,                icon: 'checkmark-done-outline'  },
   TERMINE:   { label: 'Terminé',  color: C.grn,   bg: C.grnDim,                icon: 'trophy-outline'          },
-  ANNULE:    { label: 'Annulé',   color: C.dim,   bg: 'rgba(255,255,255,0.05)',icon: 'close-circle-outline'    },
+  ANNULE:    { label: 'Annulé',   color: C.dim,   bg: 'rgba(0,0,0,0.05)',icon: 'close-circle-outline'    },
 };
 
 type FilterKey = 'all' | 'actifs' | 'livres' | 'annules';
@@ -122,6 +124,21 @@ function ColisCard({ item, onPublish, onCancel }: {
           <Text style={S.trajetBannerTxt}>Voyage en cours de livraison</Text>
           <View style={S.trajetBannerDot} />
         </View>
+      )}
+
+      {/* GPS live tracking button — EN_COURS only */}
+      {item.statut === 'EN_COURS' && item.trajetId && (
+        <TouchableOpacity
+          style={S.gpsBtn}
+          activeOpacity={0.85}
+          onPress={() => router.push({
+            pathname: '/(dashboard)/tracking/[colisId]',
+            params: { colisId: item.id },
+          } as any)}
+        >
+          <Ionicons name="map" size={14} color={C.blu} />
+          <Text style={S.gpsBtnTxt}>Suivre en direct</Text>
+        </TouchableOpacity>
       )}
 
       {item.statut === 'BROUILLON' && (
@@ -570,7 +587,7 @@ export default function ColisScreen() {
 
   return (
     <View style={S.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <SafeAreaView style={S.safe} edges={['top']}>
 
         {/* Header */}
@@ -631,7 +648,7 @@ export default function ColisScreen() {
 
             {loading ? (
               <View style={S.center}>
-                <ActivityIndicator color={C.red} size="large" />
+                <ActivityIndicator color={C.grn} size="large" />
               </View>
             ) : (
               <FlatList
@@ -643,8 +660,8 @@ export default function ColisScreen() {
                   <RefreshControl
                     refreshing={refresh}
                     onRefresh={() => load(true)}
-                    tintColor={C.red}
-                    colors={[C.red]}
+                    tintColor={C.grn}
+                    colors={[C.grn]}
                   />
                 }
                 ListEmptyComponent={
@@ -670,7 +687,7 @@ export default function ColisScreen() {
         {activeTab === 'public' && (
           loadingPub ? (
             <View style={S.center}>
-              <ActivityIndicator color={C.red} size="large" />
+              <ActivityIndicator color={C.grn} size="large" />
             </View>
           ) : (
             <FlatList
@@ -739,11 +756,11 @@ const S = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     alignItems: 'center',
     justifyContent: 'center',
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.45, shadowRadius: 10 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.55, shadowRadius: 10 },
       android: { elevation: 8 },
     }),
   },
@@ -757,9 +774,9 @@ const S = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.bd,
   },
-  filterTabActive: { backgroundColor: C.redDim, borderColor: 'rgba(220,38,38,0.35)' },
+  filterTabActive: { backgroundColor: C.grnDim, borderColor: 'rgba(74,222,128,0.35)' },
   filterTxt:       { color: C.gr,  fontSize: 13, fontWeight: '600' },
-  filterTxtActive: { color: C.red, fontSize: 13, fontWeight: '700' },
+  filterTxtActive: { color: C.grn, fontSize: 13, fontWeight: '700' },
 
   list: { paddingHorizontal: 20, paddingBottom: 28, gap: 12 },
 
@@ -793,11 +810,11 @@ const S = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 12,
     paddingVertical: 11,
   },
-  publishBtnTxt: { color: C.wh, fontSize: 13, fontWeight: '700' },
+  publishBtnTxt: { color: '#0f1419', fontSize: 13, fontWeight: '700' },
   cancelBtn:     { paddingHorizontal: 16, paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: C.bd },
   cancelBtnTxt:  { color: C.gr, fontSize: 13, fontWeight: '600' },
 
@@ -832,6 +849,20 @@ const S = StyleSheet.create({
   },
   payBtnTxt: { color: C.wh, fontSize: 14, fontWeight: '700' },
 
+  gpsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    marginTop: 10,
+    paddingVertical: 11,
+    borderRadius: 12,
+    backgroundColor: 'rgba(59,130,246,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(59,130,246,0.30)',
+  },
+  gpsBtnTxt: { color: C.blu, fontSize: 13, fontWeight: '700' },
+
   empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
   emptyTitle: { color: C.wh, fontSize: 18, fontWeight: '700' },
   emptyTxt:   { color: C.gr, fontSize: 14, textAlign: 'center', lineHeight: 22, paddingHorizontal: 30 },
@@ -847,9 +878,9 @@ const S = StyleSheet.create({
     borderColor: C.bd,
     alignItems: 'center',
   },
-  tabBtnActive: { backgroundColor: C.redDim, borderColor: 'rgba(220,38,38,0.35)' },
+  tabBtnActive: { backgroundColor: C.grnDim, borderColor: 'rgba(74,222,128,0.35)' },
   tabTxt:       { color: C.gr,  fontSize: 13, fontWeight: '600' },
-  tabTxtActive: { color: C.red, fontSize: 13, fontWeight: '700' },
+  tabTxtActive: { color: C.grn, fontSize: 13, fontWeight: '700' },
 
   // ── Public colis card "Assigner" button
   accepterBtn: {
@@ -875,12 +906,12 @@ const ST = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     maxHeight: '88%',
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(0,0,0,0.08)',
     ...Platform.select({
       ios:     { shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.55, shadowRadius: 24 },
       android: { elevation: 32 },
@@ -888,14 +919,14 @@ const ST = StyleSheet.create({
   },
   handle: {
     width: 40, height: 4, borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(0,0,0,0.12)',
     alignSelf: 'center', marginTop: 12, marginBottom: 4,
   },
 
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 16,
-    borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+    borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
   iconWrap: {
@@ -908,19 +939,19 @@ const ST = StyleSheet.create({
   subtitle: { color: C.gr, fontSize: 12, fontWeight: '400', marginTop: 2 },
   closeBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center', justifyContent: 'center',
   },
 
   colisInfo: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 8,
     paddingHorizontal: 20, paddingVertical: 12,
-    borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
+    borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
   },
   colisPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
   },
   colisPillTxt: { color: C.gr, fontSize: 12, fontWeight: '500' },
@@ -946,8 +977,8 @@ const ST = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 40, gap: 12 },
   emptyIconWrap: {
     width: 72, height: 72, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center', justifyContent: 'center',
   },
   emptyTitle: { color: C.wh, fontSize: 16, fontWeight: '700' },
@@ -957,9 +988,9 @@ const ST = StyleSheet.create({
 
   trajetCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f5f8f5',
     borderRadius: 16, padding: 14,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     ...Platform.select({
       ios:     { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 8 },
       android: { elevation: 3 },
@@ -971,7 +1002,7 @@ const ST = StyleSheet.create({
   },
   radio: {
     width: 22, height: 22, borderRadius: 11,
-    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.18)',
     alignItems: 'center', justifyContent: 'center',
   },
   radioSelected: { backgroundColor: C.red, borderColor: C.red },
@@ -990,24 +1021,24 @@ const ST = StyleSheet.create({
       android: { elevation: 10 },
     }),
   },
-  assignBtnDisabled: { backgroundColor: '#1a1a1a', opacity: 0.55 },
+  assignBtnDisabled: { backgroundColor: '#f5f8f5', opacity: 0.55 },
   assignBtnTxt: { color: C.wh, fontSize: 15, fontWeight: '800', letterSpacing: 0.2 },
 });
 
 const SM = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: '#111111',
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     maxHeight: '92%',
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(0,0,0,0.08)',
   },
-  handle: { width: 38, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.15)', alignSelf: 'center', marginTop: 12, marginBottom: 8 },
-  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+  handle: { width: 38, height: 4, borderRadius: 2, backgroundColor: 'rgba(0,0,0,0.15)', alignSelf: 'center', marginTop: 12, marginBottom: 8 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.06)' },
   sheetTitle:  { color: C.wh, fontSize: 19, fontWeight: '800' },
-  closeBtn:    { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
+  closeBtn:    { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.06)', alignItems: 'center', justifyContent: 'center' },
 
   scrollContent: { padding: 20, gap: 16, paddingBottom: 40 },
 
@@ -1028,16 +1059,16 @@ const SM = StyleSheet.create({
   },
 
   submitBtn: {
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 15,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.45, shadowRadius: 14 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.55, shadowRadius: 14 },
       android: { elevation: 10 },
     }),
   },
-  submitTxt: { color: C.wh, fontSize: 16, fontWeight: '700' },
+  submitTxt: { color: '#0f1419', fontSize: 16, fontWeight: '700' },
 });

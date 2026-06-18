@@ -11,8 +11,10 @@ import {
     Loader2,
     Inbox,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 export default function MyPayments() {
+    const { t } = useI18n();
 
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -35,13 +37,13 @@ export default function MyPayments() {
     const getStatus = (status) => {
         switch (status) {
             case "SUCCES":
-                return { style: "bg-green-500/20 text-green-400", icon: <CheckCircle size={14} /> };
+                return { style: "bg-green-500/20 text-green-400", icon: <CheckCircle size={14} />, label: t("myPayments.statusSucces") };
             case "EN_ATTENTE":
-                return { style: "bg-yellow-500/20 text-yellow-400", icon: <Clock size={14} /> };
+                return { style: "bg-yellow-500/20 text-yellow-400", icon: <Clock size={14} />, label: t("myPayments.statusEnAttente") };
             case "ECHEC":
-                return { style: "bg-red-500/20 text-red-400", icon: <XCircle size={14} /> };
+                return { style: "bg-red-500/20 text-red-400", icon: <XCircle size={14} />, label: t("myPayments.statusEchec") };
             default:
-                return { style: "bg-gray-500/20 text-gray-400", icon: null };
+                return { style: "bg-gray-500/20 text-gray-400", icon: null, label: status };
         }
     };
 
@@ -61,7 +63,7 @@ export default function MyPayments() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 size={28} className="animate-spin text-[#1e3a8a]" />
-                <p className="text-gray-500 text-sm">Chargement des paiements...</p>
+                <p className="text-gray-500 text-sm">{t("myPayments.loading")}</p>
             </div>
         );
     }
@@ -76,10 +78,10 @@ export default function MyPayments() {
                 </div>
                 <div>
                     <h2 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">
-                        Mes paiements
+                        {t("myPayments.title")}
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        Historique de vos transactions et paiements
+                        {t("myPayments.subtitle")}
                     </p>
                 </div>
             </div>
@@ -88,7 +90,7 @@ export default function MyPayments() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-[#1e3a8a] transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Total</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("myPayments.statTotal")}</p>
                         <div className="w-8 h-8 rounded-lg bg-[#1e3a8a]/20 flex items-center justify-center">
                             <CreditCard size={14} className="text-blue-400" />
                         </div>
@@ -98,7 +100,7 @@ export default function MyPayments() {
 
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-green-500/30 transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Réussis</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("myPayments.statSuccess")}</p>
                         <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
                             <CheckCircle size={14} className="text-green-400" />
                         </div>
@@ -108,7 +110,7 @@ export default function MyPayments() {
 
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-yellow-500/30 transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">En attente</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("myPayments.statPending")}</p>
                         <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
                             <Clock size={14} className="text-yellow-400" />
                         </div>
@@ -118,7 +120,7 @@ export default function MyPayments() {
 
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-red-500/30 transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Échoués</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("myPayments.statFailed")}</p>
                         <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
                             <XCircle size={14} className="text-red-400" />
                         </div>
@@ -134,8 +136,8 @@ export default function MyPayments() {
                         <Inbox size={28} className="text-gray-400" />
                     </div>
                     <div className="text-center">
-                        <p className="dark:text-white text-gray-900 font-semibold text-base">Aucun paiement trouvé</p>
-                        <p className="text-gray-500 text-sm mt-1">Vos transactions apparaîtront ici</p>
+                        <p className="dark:text-white text-gray-900 font-semibold text-base">{t("myPayments.emptyTitle")}</p>
+                        <p className="text-gray-500 text-sm mt-1">{t("myPayments.emptyDesc")}</p>
                     </div>
                 </div>
             )}
@@ -163,7 +165,7 @@ export default function MyPayments() {
                                     </div>
                                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${status.style}`}>
                                         {status.icon}
-                                        {p.statut}
+                                        {status.label}
                                     </span>
                                 </div>
 

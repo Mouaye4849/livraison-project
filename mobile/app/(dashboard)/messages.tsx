@@ -19,21 +19,23 @@ import type { Colis, ChatMessage } from '@/types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:     '#0a0a0a',
-  card:   '#141414',
-  input:  '#1e1e1e',
-  bd:     'rgba(255,255,255,0.07)',
-  red:    '#dc2626',
-  redDim: 'rgba(220,38,38,0.12)',
-  wh:     '#ffffff',
-  gr:     '#9ca3af',
-  dim:    '#4b5563',
+  bg:     '#eef1ee',
+  card:   '#ffffff',
+  input:  '#f0f4f0',
+  bd:     'rgba(0,0,0,0.08)',
   grn:    '#22c55e',
-  grnDim: 'rgba(34,197,94,0.13)',
-  blu:    '#3b82f6',
-  bluDim: 'rgba(59,130,246,0.13)',
-  ylw:    '#facc15',
-  ylwDim: 'rgba(250,204,21,0.13)',
+  grnDk:  '#166534',
+  grnDim: 'rgba(34,197,94,0.12)',
+  grnBd:  'rgba(34,197,94,0.25)',
+  wh:     '#1a2e1a',
+  gr:     '#6b7280',
+  dim:    '#9ca3af',
+  red:    '#dc2626',
+  redDim: 'rgba(220,38,38,0.10)',
+  blu:    '#2563eb',
+  bluDim: 'rgba(37,99,235,0.10)',
+  ylw:    '#d97706',
+  ylwDim: 'rgba(217,119,6,0.10)',
 } as const;
 
 const STATUT_DOT: Record<string, string> = {
@@ -103,14 +105,28 @@ function buildListItems(messages: ChatMessage[]): ListItem[] {
 
 // ─── AudioPlayer bubble ───────────────────────────────────────────────────────
 function AudioPlayer({ url, isMe }: { url: string; isMe: boolean }) {
-  const [sound,    setSound]    = useState<Audio.Sound | null>(null);
   const [playing,  setPlaying]  = useState(false);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+  const loadingRef = useRef(false);
 
   const load = useCallback(async () => {
-    if (sound) return;
+    console.log('[DIAG-PLAYER] load() called | url=', url, ' soundRef=', !!soundRef.current, ' loading=', loadingRef.current);
+    if (soundRef.current || loadingRef.current) {
+      console.log('[DIAG-PLAYER] load() skipped (already loaded or loading)');
+      return;
+    }
+    loadingRef.current = true;
     try {
+      console.log('[DIAG-PLAYER] setAudioModeAsync → playback mode');
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+      });
+      console.log('[DIAG-PLAYER] Audio.Sound.createAsync...');
       const { sound: s, status } = await Audio.Sound.createAsync(
         { uri: url },
         { shouldPlay: false },
@@ -126,24 +142,43 @@ function AudioPlayer({ url, isMe }: { url: string; isMe: boolean }) {
           }
         }
       );
-      setSound(s);
+      console.log('[DIAG-PLAYER] ✓ sound created | isLoaded=', status.isLoaded, ' duration=', status.isLoaded ? status.durationMillis : 'N/A');
+      soundRef.current = s;
       if (status.isLoaded) setDuration(status.durationMillis ?? 0);
-    } catch {}
-  }, [url, sound]);
+    } catch (err) {
+      console.error('[DIAG-PLAYER] ✗ load error:', err);
+    }
+    finally { loadingRef.current = false; }
+  }, [url]);
 
   useEffect(() => {
     load();
-    return () => { sound?.unloadAsync(); };
+    return () => { soundRef.current?.unloadAsync(); soundRef.current = null; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggle = async () => {
-    if (!sound) { await load(); return; }
+    const s = soundRef.current;
+    console.log('[DIAG-PLAYER] toggle() | soundRef=', !!s, ' playing=', playing);
+    if (!s) {
+      console.log('[DIAG-PLAYER] sound not ready — calling load()');
+      await load();
+      if (soundRef.current && !playing) {
+        console.log('[DIAG-PLAYER] load done — calling playAsync()');
+        await soundRef.current.playAsync();
+        setPlaying(true);
+      } else {
+        console.log('[DIAG-PLAYER] after load: soundRef=', !!soundRef.current, ' playing=', playing, ' → not playing');
+      }
+      return;
+    }
     if (playing) {
-      await sound.pauseAsync();
+      console.log('[DIAG-PLAYER] → pauseAsync()');
+      await s.pauseAsync();
       setPlaying(false);
     } else {
-      await sound.playAsync();
+      console.log('[DIAG-PLAYER] → playAsync()');
+      await s.playAsync();
       setPlaying(true);
     }
   };
@@ -179,18 +214,18 @@ const AP = StyleSheet.create({
   wrapThem:{},
   btn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
     alignItems: 'center', justifyContent: 'center',
   },
   right:   { flex: 1, gap: 4 },
   bar: {
     height: 3, borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
     overflow: 'hidden',
   },
   fill:    { height: '100%', backgroundColor: C.wh, borderRadius: 2 },
   time:    { fontSize: 10 },
-  timeMe:  { color: 'rgba(255,255,255,0.55)' },
+  timeMe:  { color: 'rgba(0,0,0,0.55)' },
   timeThem:{ color: C.dim },
 });
 
@@ -217,7 +252,7 @@ function ConversationCard({ item, myEmail, lastMsg, isUnread, onPress }: {
   return (
     <TouchableOpacity style={[S.convCard, isUnread && S.convCardUnread]} activeOpacity={0.8} onPress={onPress}>
       <View style={[S.convAvatar, isUnread && S.convAvatarUnread]}>
-        <Ionicons name="cube" size={20} color={isUnread ? C.blu : C.red} />
+        <Ionicons name="cube" size={20} color={isUnread ? C.blu : C.grn} />
         {isUnread && <View style={S.unreadAvatarDot} />}
       </View>
       <View style={S.convBody}>
@@ -253,6 +288,7 @@ function ChatModal({ colis, myEmail, onClose }: {
   const [messages,   setMessages]   = useState<ChatMessage[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [text,       setText]       = useState('');
+  const textRef = useRef('');
   const [sending,    setSending]    = useState(false);
   const [uploading,  setUploading]  = useState(false);
   const [uploadPct,  setUploadPct]  = useState(0);
@@ -282,7 +318,12 @@ function ChatModal({ colis, myEmail, onClose }: {
   useEffect(() => {
     fetchMessages();
     intervalRef.current = setInterval(() => fetchMessages(true), POLL_MS);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (recIntervalRef.current) clearInterval(recIntervalRef.current);
+      recRef.current?.stopAndUnloadAsync().catch(() => {});
+      recRef.current = null;
+    };
   }, [fetchMessages]);
 
   // ── Optimistic helpers ─────────────────────────────────────────────────────
@@ -313,20 +354,36 @@ function ChatModal({ colis, myEmail, onClose }: {
 
   // ── Send text ──────────────────────────────────────────────────────────────
   const handleSend = async () => {
-    const content = text.trim();
-    if (!content || sending) return;
+    // Use textRef to capture the latest value even if React hasn't batched the setState yet
+    // (protects against Arabic IME commit race on Android)
+    const raw = textRef.current || text;
+    const content = raw.trim();
+    console.log('[DIAG-TEXT] handleSend ─ raw=', JSON.stringify(raw), ' trimmed=', JSON.stringify(content), ' len=', content.length, ' sending=', sending);
+    if (!content || sending) {
+      console.log('[DIAG-TEXT] BLOCKED ─ content empty?', !content, ' already sending?', sending);
+      return;
+    }
     const tempId = addOptimistic({ type: 'TEXT', content });
+    textRef.current = '';
     setText('');
     setSending(true);
     try {
+      console.log('[DIAG-TEXT] → chatService.sendMessage colisId=', colis.id, ' payload=', JSON.stringify({ colisId: colis.id, content, type: 'TEXT' }));
       const confirmed = await chatService.sendMessage(colis.id, content);
+      console.log('[DIAG-TEXT] ✓ response id=', confirmed.id, ' content=', JSON.stringify(confirmed.content), ' type=', confirmed.type);
       confirmOptimistic(tempId, confirmed);
-    } catch {
+    } catch (err) {
+      console.error('[DIAG-TEXT] ✗ sendMessage error:', err);
       removeOptimistic(tempId);
       setText(content);
     } finally {
       setSending(false);
     }
+  };
+
+  const handleSendFromKeyboard = () => {
+    console.log('[DIAG-TEXT] onSubmitEditing fired ← keyboard send key');
+    handleSend();
   };
 
   // ── Pick image from gallery ────────────────────────────────────────────────
@@ -373,6 +430,7 @@ function ChatModal({ colis, myEmail, onClose }: {
       const ext  = uri.split('.').pop() ?? 'jpg';
       const mime = `image/${ext === 'png' ? 'png' : 'jpeg'}`;
       const url  = await chatService.uploadFile(uri, mime, `image_${Date.now()}.${ext}`);
+      console.log('[DIAG-URL] image final url=', url);
       clearInterval(prog);
       setUploadPct(100);
       const confirmed = await chatService.sendMedia(colis.id, 'IMAGE', url);
@@ -398,16 +456,21 @@ function ChatModal({ colis, myEmail, onClose }: {
 
   // ── Audio recording ────────────────────────────────────────────────────────
   const startRecording = async () => {
+    console.log('[DIAG-AUDIO] startRecording called');
     const { status } = await Audio.requestPermissionsAsync();
+    console.log('[DIAG-AUDIO] microphone permission=', status);
     if (status !== 'granted') {
       Alert.alert('Permission requise', 'Autorisez l\'accès au microphone pour envoyer des messages vocaux.');
       return;
     }
     try {
+      console.log('[DIAG-AUDIO] setAudioModeAsync → recording mode');
       await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      console.log('[DIAG-AUDIO] Audio.Recording.createAsync...');
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY,
       );
+      console.log('[DIAG-AUDIO] ✓ recording created');
       recRef.current      = recording;
       recStartRef.current = Date.now();
       setRecording(true);
@@ -416,12 +479,14 @@ function ChatModal({ colis, myEmail, onClose }: {
         () => setRecDurMs(Date.now() - recStartRef.current),
         500,
       );
-    } catch {
+    } catch (err) {
+      console.error('[DIAG-AUDIO] ✗ startRecording error:', err);
       Alert.alert('Erreur', 'Impossible de démarrer l\'enregistrement.');
     }
   };
 
   const stopRecording = async () => {
+    console.log('[DIAG-AUDIO] stopRecording called | recRef.current=', !!recRef.current);
     if (!recRef.current) return;
     if (recIntervalRef.current) clearInterval(recIntervalRef.current);
     setRecording(false);
@@ -431,22 +496,34 @@ function ChatModal({ colis, myEmail, onClose }: {
     recRef.current = null;
 
     try {
+      console.log('[DIAG-AUDIO] stopAndUnloadAsync...');
       await rec.stopAndUnloadAsync();
+      console.log('[DIAG-AUDIO] ✓ stopped');
       await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
       const uri = rec.getURI();
-      if (!uri) return;
+      console.log('[DIAG-AUDIO] URI=', uri);
+      if (!uri) {
+        console.warn('[DIAG-AUDIO] ✗ URI is null — aborting send');
+        return;
+      }
 
       const tempId = addOptimistic({ type: 'AUDIO', fileUrl: uri });
       setUploading(true);
       setUploadPct(0);
       const prog = setInterval(() => setUploadPct(p => Math.min(p + 15, 85)), 200);
       try {
-        const url  = await chatService.uploadFile(uri, 'audio/m4a', `audio_${Date.now()}.m4a`);
+        const filename = `audio_${Date.now()}.m4a`;
+        console.log('[DIAG-AUDIO] → uploadFile uri=', uri, ' mime=audio/m4a name=', filename);
+        const url  = await chatService.uploadFile(uri, 'audio/m4a', filename);
+        console.log('[DIAG-AUDIO] ✓ upload OK url=', url);
         clearInterval(prog);
         setUploadPct(100);
+        console.log('[DIAG-AUDIO] → sendMedia AUDIO colisId=', colis.id, ' url=', url);
         const confirmed = await chatService.sendMedia(colis.id, 'AUDIO', url);
+        console.log('[DIAG-AUDIO] ✓ sendMedia OK id=', confirmed.id);
         confirmOptimistic(tempId, confirmed);
-      } catch {
+      } catch (err) {
+        console.error('[DIAG-AUDIO] ✗ upload/sendMedia error:', err);
         clearInterval(prog);
         removeOptimistic(tempId);
         Alert.alert('Erreur', 'Impossible d\'envoyer le message vocal.');
@@ -454,7 +531,8 @@ function ChatModal({ colis, myEmail, onClose }: {
         setUploading(false);
         setUploadPct(0);
       }
-    } catch {
+    } catch (err) {
+      console.error('[DIAG-AUDIO] ✗ stopAndUnload error:', err);
       Alert.alert('Erreur', 'Enregistrement invalide.');
     }
   };
@@ -519,8 +597,8 @@ function ChatModal({ colis, myEmail, onClose }: {
           <Text style={CM.timeStamp}>{formatMsgTime(msg)}</Text>
           {isMe && (
             isOpt
-              ? <Ionicons name="time-outline"   size={11} color="rgba(255,255,255,0.35)" />
-              : <Ionicons name="checkmark-done" size={11} color="rgba(255,255,255,0.50)" />
+              ? <Ionicons name="time-outline"   size={11} color="rgba(0,0,0,0.35)" />
+              : <Ionicons name="checkmark-done" size={11} color="rgba(0,0,0,0.50)" />
           )}
         </View>
       </View>
@@ -530,7 +608,7 @@ function ChatModal({ colis, myEmail, onClose }: {
   return (
     <Modal visible animationType="slide" onRequestClose={onClose}>
       <View style={CM.root}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <SafeAreaView style={CM.safe} edges={['top']}>
 
           {/* ── Header */}
@@ -571,7 +649,7 @@ function ChatModal({ colis, myEmail, onClose }: {
           {/* ── Messages */}
           {loading ? (
             <View style={CM.center}>
-              <ActivityIndicator color={C.red} />
+              <ActivityIndicator color={C.grn} />
             </View>
           ) : (
             <FlatList
@@ -617,12 +695,12 @@ function ChatModal({ colis, myEmail, onClose }: {
                   placeholder="Votre message…"
                   placeholderTextColor={C.dim}
                   value={text}
-                  onChangeText={setText}
+                  onChangeText={(v) => { textRef.current = v; setText(v); }}
                   multiline
                   maxLength={500}
                   returnKeyType="send"
-                  blurOnSubmit={false}
-                  onSubmitEditing={handleSend}
+                  submitBehavior="submit"
+                  onSubmitEditing={handleSendFromKeyboard}
                   editable={!recording}
                 />
 
@@ -648,8 +726,8 @@ function ChatModal({ colis, myEmail, onClose }: {
                     activeOpacity={0.85}
                   >
                     {sending
-                      ? <ActivityIndicator color={C.wh} size="small" />
-                      : <Ionicons name="send" size={18} color={C.wh} />
+                      ? <ActivityIndicator color="#0f1419" size="small" />
+                      : <Ionicons name="send" size={18} color="#0f1419" />
                     }
                   </TouchableOpacity>
                 )}
@@ -751,7 +829,7 @@ export default function MessagesScreen() {
 
   return (
     <View style={S.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <SafeAreaView style={S.safe} edges={['top']}>
 
         <View style={S.header}>
@@ -770,7 +848,7 @@ export default function MessagesScreen() {
 
         {loading ? (
           <View style={S.center}>
-            <ActivityIndicator color={C.red} size="large" />
+            <ActivityIndicator color={C.grn} size="large" />
           </View>
         ) : (
           <FlatList
@@ -779,7 +857,7 @@ export default function MessagesScreen() {
             contentContainerStyle={S.list}
             showsVerticalScrollIndicator={false}
             refreshControl={
-              <RefreshControl refreshing={refresh} onRefresh={handleRefresh} tintColor={C.red} colors={[C.red]} />
+              <RefreshControl refreshing={refresh} onRefresh={handleRefresh} tintColor={C.grn} colors={[C.grn]} />
             }
             ListHeaderComponent={
               conversations.length > 0 ? (
@@ -862,7 +940,7 @@ const S = StyleSheet.create({
   },
   convCardUnread: { borderColor: 'rgba(59,130,246,0.30)', backgroundColor: 'rgba(59,130,246,0.05)' },
   convAvatar: {
-    width: 50, height: 50, borderRadius: 25, backgroundColor: C.redDim,
+    width: 50, height: 50, borderRadius: 25, backgroundColor: C.grnDim,
     alignItems: 'center', justifyContent: 'center', position: 'relative',
   },
   convAvatarUnread: { backgroundColor: 'rgba(59,130,246,0.15)' },
@@ -890,8 +968,8 @@ const S = StyleSheet.create({
   empty: { alignItems: 'center', paddingTop: 70, gap: 14 },
   emptyIconWrap: {
     width: 76, height: 76, borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center', justifyContent: 'center',
   },
   emptyTitle: { color: C.wh, fontSize: 18, fontWeight: '700' },
@@ -908,11 +986,11 @@ const CM = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingHorizontal: 16, paddingVertical: 14,
     borderBottomWidth: 1, borderColor: C.bd,
-    backgroundColor: '#0d0d0d',
+    backgroundColor: '#f5f8f5',
   },
   backBtn: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
     borderWidth: 1, borderColor: C.bd,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -925,7 +1003,7 @@ const CM = StyleSheet.create({
   headerSub:      { color: C.gr, fontSize: 12, marginTop: 2 },
 
   // Upload progress strip
-  uploadBar: { height: 3, backgroundColor: 'rgba(255,255,255,0.07)' },
+  uploadBar: { height: 3, backgroundColor: 'rgba(0,0,0,0.07)' },
   uploadFill: { height: '100%', backgroundColor: C.blu },
 
   // Recording indicator
@@ -942,7 +1020,7 @@ const CM = StyleSheet.create({
   messageList: { padding: 16, gap: 4, paddingBottom: 20 },
 
   separator: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 12 },
-  sepLine:   { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.07)' },
+  sepLine:   { flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.07)' },
   sepLabel:  { color: C.dim, fontSize: 11, fontWeight: '600' },
 
   bubbleWrap:     { marginBottom: 4 },
@@ -951,20 +1029,20 @@ const CM = StyleSheet.create({
 
   bubble: { maxWidth: '78%', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10 },
   bubbleMe: {
-    backgroundColor: C.red, borderBottomRightRadius: 5,
+    backgroundColor: C.grn, borderBottomRightRadius: 5,
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.30, shadowRadius: 6 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.30, shadowRadius: 6 },
       android: { elevation: 4 },
     }),
   },
   bubbleThem: {
-    backgroundColor: '#1e1e1e', borderBottomLeftRadius: 5,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#f0f4f0', borderBottomLeftRadius: 5,
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)',
   },
   bubbleOptimistic: { opacity: 0.75 },
 
-  msgTxt:     { fontSize: 15, lineHeight: 22, fontWeight: '400' },
-  msgTxtMe:   { color: C.wh },
+  msgTxt:     { fontSize: 15, lineHeight: 22, fontWeight: '400', textAlign: 'auto' as const },
+  msgTxtMe:   { color: '#0f1419' },
   msgTxtThem: { color: C.wh },
 
   // Image bubble
@@ -982,17 +1060,17 @@ const CM = StyleSheet.create({
   audioOptimistic: {
     flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4,
   },
-  audioOptTxt: { color: 'rgba(255,255,255,0.65)', fontSize: 13 },
+  audioOptTxt: { color: 'rgba(0,0,0,0.65)', fontSize: 13 },
 
   metaRow:   { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3, paddingHorizontal: 4 },
   metaRowMe: { justifyContent: 'flex-end' },
-  timeStamp: { fontSize: 10, color: 'rgba(255,255,255,0.40)' },
+  timeStamp: { fontSize: 10, color: 'rgba(0,0,0,0.40)' },
 
   empty: { alignItems: 'center', paddingTop: 60, gap: 10 },
   emptyIconWrap: {
     width: 68, height: 68, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
   emptyTitle: { color: C.gr, fontSize: 15, fontWeight: '600' },
@@ -1003,18 +1081,18 @@ const CM = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
     paddingHorizontal: 12, paddingVertical: 10,
     borderTopWidth: 1, borderColor: C.bd,
-    backgroundColor: '#0d0d0d',
+    backgroundColor: '#f5f8f5',
   },
   iconBtn: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.10)',
     alignItems: 'center', justifyContent: 'center',
   },
   iconBtnRec: { backgroundColor: 'rgba(220,38,38,0.15)', borderColor: 'rgba(220,38,38,0.30)' },
   input: {
     flex: 1,
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#f0f4f0',
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingVertical: Platform.OS === 'ios' ? 12 : 10,
@@ -1022,15 +1100,15 @@ const CM = StyleSheet.create({
     fontSize: 15,
     maxHeight: 120,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+    borderColor: 'rgba(0,0,0,0.10)',
   },
   sendBtn: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: C.red, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: C.grn, alignItems: 'center', justifyContent: 'center',
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.40, shadowRadius: 10 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.40, shadowRadius: 10 },
       android: { elevation: 7 },
     }),
   },
-  sendBtnDis: { backgroundColor: '#2a2a2a', opacity: 0.5 },
+  sendBtnDis: { backgroundColor: '#d1d5db', opacity: 0.5 },
 });

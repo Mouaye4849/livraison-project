@@ -28,29 +28,32 @@ import { StatusBar } from 'expo-status-bar';
 import { AxiosError } from 'axios';
 import { trajetService } from '@/services/trajet.service';
 import { colisService } from '@/services/colis.service';
+import { GpsShareBadge } from '@/components/GpsShareBadge';
 import { useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services/auth.service';
 import type { Trajet, TrajetRequest, Colis, ApiError } from '@/types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:     '#0a0a0a',
-  card:   '#141414',
-  input:  '#1a1a1a',
-  bd:     'rgba(255,255,255,0.07)',
-  red:    '#dc2626',
-  redDim: 'rgba(220,38,38,0.12)',
-  wh:     '#ffffff',
-  gr:     '#9ca3af',
-  dim:    '#4b5563',
+  bg:     '#eef1ee',
+  card:   '#ffffff',
+  input:  '#f0f4f0',
+  bd:     'rgba(0,0,0,0.08)',
   grn:    '#22c55e',
-  grnDim: 'rgba(34,197,94,0.13)',
-  ylw:    '#facc15',
-  ylwDim: 'rgba(250,204,21,0.13)',
-  blu:    '#3b82f6',
-  bluDim: 'rgba(59,130,246,0.13)',
-  pur:    '#a855f7',
-  purDim: 'rgba(168,85,247,0.13)',
+  grnDk:  '#166534',
+  grnDim: 'rgba(34,197,94,0.12)',
+  grnBd:  'rgba(34,197,94,0.25)',
+  wh:     '#1a2e1a',
+  gr:     '#6b7280',
+  dim:    '#9ca3af',
+  red:    '#dc2626',
+  redDim: 'rgba(220,38,38,0.10)',
+  ylw:    '#d97706',
+  ylwDim: 'rgba(217,119,6,0.10)',
+  blu:    '#2563eb',
+  bluDim: 'rgba(37,99,235,0.10)',
+  pur:    '#7c3aed',
+  purDim: 'rgba(124,58,237,0.10)',
 } as const;
 
 const STATUT_CFG: Record<string, { label: string; color: string; bg: string }> = {
@@ -59,7 +62,7 @@ const STATUT_CFG: Record<string, { label: string; color: string; bg: string }> =
   COMPLET:    { label: 'Complet',    color: C.ylw,  bg: C.ylwDim },
   EN_COURS:   { label: 'En cours',   color: C.blu,  bg: C.bluDim },
   TERMINE:    { label: 'Terminé',    color: C.pur,  bg: C.purDim },
-  ANNULE:     { label: 'Annulé',     color: C.dim,  bg: 'rgba(255,255,255,0.05)' },
+  ANNULE:     { label: 'Annulé',     color: C.dim,  bg: 'rgba(0,0,0,0.05)' },
   REFUSE:     { label: 'Refusé',     color: C.red,  bg: C.redDim },
 };
 
@@ -70,7 +73,7 @@ const COLIS_STATUT_CFG: Record<string, { label: string; color: string; bg: strin
   EN_COURS:  { label: 'En cours', color: C.red,   bg: C.redDim },
   LIVRE:     { label: 'Livré',    color: C.grn,   bg: C.grnDim },
   TERMINE:   { label: 'Terminé',  color: C.pur,   bg: C.purDim },
-  ANNULE:    { label: 'Annulé',   color: C.dim,   bg: 'rgba(255,255,255,0.05)' },
+  ANNULE:    { label: 'Annulé',   color: C.dim,   bg: 'rgba(0,0,0,0.05)' },
 };
 
 type TabKey = 'public' | 'mine';
@@ -175,6 +178,11 @@ function TrajetCard({ item, isOwner, onCancel, onAssignColis, onStartColis, onFi
                     <Text style={S.deliveryBtnTxt}>Livré</Text>
                   </TouchableOpacity>
                 )}
+
+                {/* GPS sharing badge — auto-starts when EN_COURS */}
+                {c.statut === 'EN_COURS' && (
+                  <GpsShareBadge colisId={c.id} />
+                )}
               </View>
             );
           })}
@@ -230,6 +238,8 @@ function CreateTrajetModal({ visible, onClose, onCreated }: {
     if (!form.origine.trim())     return 'La ville de départ est requise';
     if (!form.destination.trim()) return 'La destination est requise';
     if (!form.dateDepart.trim())  return 'La date de départ est requise';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(form.dateDepart.trim()))
+      return 'Format de date invalide (AAAA-MM-JJ)';
     if (form.capaciteKg <= 0)     return 'La capacité doit être supérieure à 0';
     return null;
   };
@@ -286,7 +296,7 @@ function CreateTrajetModal({ visible, onClose, onCreated }: {
           <View style={SM.header}>
             <View style={SM.headerLeft}>
               <View style={SM.headerIconWrap}>
-                <Ionicons name="airplane" size={20} color={C.red} />
+                <Ionicons name="airplane" size={20} color={C.grn} />
               </View>
               <View>
                 <Text style={SM.headerTitle}>Nouveau voyage</Text>
@@ -316,7 +326,7 @@ function CreateTrajetModal({ visible, onClose, onCreated }: {
 
             {/* ── ROUTE SECTION ───────────────────────────── */}
             <View style={SM.sectionRow}>
-              <Ionicons name="map-outline" size={14} color={C.red} />
+              <Ionicons name="map-outline" size={14} color={C.grn} />
               <Text style={SM.sectionLabel}>Itinéraire</Text>
             </View>
 
@@ -371,20 +381,20 @@ function CreateTrajetModal({ visible, onClose, onCreated }: {
                   <Text style={SM.routePreviewTxt} numberOfLines={1}>
                     {form.origine.trim()} → {form.destination.trim()}
                   </Text>
-                  <Ionicons name="airplane-outline" size={13} color={C.red} />
+                  <Ionicons name="airplane-outline" size={13} color={C.grn} />
                 </View>
               )}
             </View>
 
             {/* ── DATE SECTION ────────────────────────────── */}
             <View style={SM.sectionRow}>
-              <Ionicons name="calendar-outline" size={14} color={C.red} />
+              <Ionicons name="calendar-outline" size={14} color={C.grn} />
               <Text style={SM.sectionLabel}>Date de départ</Text>
             </View>
 
             <View style={[SM.dateCard, focused === 'date' && SM.dateCardActive]}>
               <View style={SM.dateIconWrap}>
-                <Ionicons name="calendar" size={20} color={C.red} />
+                <Ionicons name="calendar" size={20} color={C.grn} />
               </View>
               <View style={SM.dateRight}>
                 <TextInput
@@ -405,7 +415,7 @@ function CreateTrajetModal({ visible, onClose, onCreated }: {
 
             {/* ── CAPACITY SECTION ────────────────────────── */}
             <View style={SM.sectionRow}>
-              <Ionicons name="scale-outline" size={14} color={C.red} />
+              <Ionicons name="scale-outline" size={14} color={C.grn} />
               <Text style={SM.sectionLabel}>Capacité disponible</Text>
             </View>
 
@@ -484,9 +494,9 @@ function CreateTrajetModal({ visible, onClose, onCreated }: {
                   <ActivityIndicator color={C.wh} size="small" />
                 ) : (
                   <>
-                    <Ionicons name="airplane" size={18} color={C.wh} />
+                    <Ionicons name="airplane" size={18} color="#0f1419" />
                     <Text style={SM.submitTxt}>Publier mon voyage</Text>
-                    <Ionicons name="arrow-forward" size={16} color="rgba(255,255,255,0.65)" />
+                    <Ionicons name="arrow-forward" size={16} color="rgba(15,20,25,0.50)" />
                   </>
                 )}
               </TouchableOpacity>
@@ -495,7 +505,7 @@ function CreateTrajetModal({ visible, onClose, onCreated }: {
             {/* Legal note */}
             <Text style={SM.legalTxt}>
               En publiant, vous acceptez les{' '}
-              <Text style={{ color: 'rgba(220,38,38,0.75)', fontWeight: '600' }}>
+              <Text style={{ color: 'rgba(74,222,128,0.85)', fontWeight: '600' }}>
                 conditions WASALI
               </Text>
             </Text>
@@ -778,7 +788,7 @@ export default function VoyagesScreen() {
 
   return (
     <View style={S.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <SafeAreaView style={S.safe} edges={['top']}>
 
         {/* Header */}
@@ -821,7 +831,7 @@ export default function VoyagesScreen() {
 
         {loading ? (
           <View style={S.center}>
-            <ActivityIndicator color={C.red} size="large" />
+            <ActivityIndicator color={C.grn} size="large" />
           </View>
         ) : (
           <FlatList
@@ -833,8 +843,8 @@ export default function VoyagesScreen() {
               <RefreshControl
                 refreshing={refresh}
                 onRefresh={() => load(true)}
-                tintColor={C.red}
-                colors={[C.red]}
+                tintColor={C.grn}
+                colors={[C.grn]}
               />
             }
             ListEmptyComponent={
@@ -899,11 +909,11 @@ const S = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     alignItems: 'center',
     justifyContent: 'center',
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.45, shadowRadius: 10 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.55, shadowRadius: 10 },
       android: { elevation: 8 },
     }),
   },
@@ -918,9 +928,9 @@ const S = StyleSheet.create({
     borderColor: C.bd,
     alignItems: 'center',
   },
-  tabBtnActive: { backgroundColor: C.redDim, borderColor: 'rgba(220,38,38,0.35)' },
+  tabBtnActive: { backgroundColor: C.grnDim, borderColor: 'rgba(74,222,128,0.35)' },
   tabTxt:       { color: C.gr,  fontSize: 13, fontWeight: '600' },
-  tabTxtActive: { color: C.red, fontSize: 13, fontWeight: '700' },
+  tabTxtActive: { color: C.grn, fontSize: 13, fontWeight: '700' },
 
   list: { paddingHorizontal: 20, paddingBottom: 28, gap: 12 },
 
@@ -984,7 +994,7 @@ const S = StyleSheet.create({
   colisSection: {
     marginTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
+    borderTopColor: 'rgba(0,0,0,0.06)',
     paddingTop: 10,
     gap: 6,
   },
@@ -1005,7 +1015,7 @@ const S = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
@@ -1049,12 +1059,12 @@ const SM = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     maxHeight: '93%',
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(0,0,0,0.08)',
     ...Platform.select({
       ios:     { shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.55, shadowRadius: 24 },
       android: { elevation: 32 },
@@ -1064,7 +1074,7 @@ const SM = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(0,0,0,0.12)',
     alignSelf: 'center',
     marginTop: 12,
     marginBottom: 4,
@@ -1078,7 +1088,7 @@ const SM = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(0,0,0,0.06)',
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
   headerIconWrap: {
@@ -1097,9 +1107,9 @@ const SM = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1134,10 +1144,10 @@ const SM = StyleSheet.create({
 
   // ── Route card
   routeCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f5f8f5',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    borderColor: 'rgba(0,0,0,0.07)',
     paddingTop: 6,
     paddingBottom: 6,
     paddingHorizontal: 16,
@@ -1165,7 +1175,7 @@ const SM = StyleSheet.create({
     flex: 1,
     minHeight: 18,
     marginTop: 5,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.08)',
     borderRadius: 1,
   },
   routeFieldWrap: { flex: 1, paddingLeft: 4 },
@@ -1182,9 +1192,9 @@ const SM = StyleSheet.create({
     fontWeight: '600',
     paddingBottom: 8,
     borderBottomWidth: 1.5,
-    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomColor: 'rgba(0,0,0,0.08)',
   },
-  routeInputActive: { borderBottomColor: C.red },
+  routeInputActive: { borderBottomColor: C.grn },
   routePreview: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1192,22 +1202,22 @@ const SM = StyleSheet.create({
     marginHorizontal: 2,
     marginBottom: 10,
     marginTop: 2,
-    backgroundColor: 'rgba(220,38,38,0.08)',
+    backgroundColor: 'rgba(74,222,128,0.08)',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(220,38,38,0.15)',
+    borderColor: 'rgba(74,222,128,0.20)',
   },
-  routePreviewDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.red },
+  routePreviewDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.grn },
   routePreviewTxt: { flex: 1, color: C.gr, fontSize: 12, fontWeight: '500' },
 
   // ── Date card
   dateCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f5f8f5',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    borderColor: 'rgba(0,0,0,0.07)',
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
@@ -1219,16 +1229,16 @@ const SM = StyleSheet.create({
     }),
   },
   dateCardActive: {
-    borderColor: 'rgba(220,38,38,0.40)',
-    backgroundColor: '#1f1515',
+    borderColor: 'rgba(74,222,128,0.40)',
+    backgroundColor: '#f0fdf4',
   },
   dateIconWrap: {
     width: 42,
     height: 42,
     borderRadius: 13,
-    backgroundColor: 'rgba(220,38,38,0.12)',
+    backgroundColor: 'rgba(74,222,128,0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(220,38,38,0.20)',
+    borderColor: 'rgba(74,222,128,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1238,10 +1248,10 @@ const SM = StyleSheet.create({
 
   // ── Capacity stepper
   capacityCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f5f8f5',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    borderColor: 'rgba(0,0,0,0.07)',
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
@@ -1256,9 +1266,9 @@ const SM = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 15,
-    backgroundColor: 'rgba(220,38,38,0.13)',
+    backgroundColor: 'rgba(74,222,128,0.13)',
     borderWidth: 1,
-    borderColor: 'rgba(220,38,38,0.28)',
+    borderColor: 'rgba(74,222,128,0.30)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1279,17 +1289,17 @@ const SM = StyleSheet.create({
     flex: 1,
     paddingVertical: 9,
     borderRadius: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f5f8f5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center',
   },
   presetActive: {
-    backgroundColor: 'rgba(220,38,38,0.13)',
-    borderColor: 'rgba(220,38,38,0.35)',
+    backgroundColor: 'rgba(74,222,128,0.13)',
+    borderColor: 'rgba(74,222,128,0.35)',
   },
   presetTxt:       { color: C.dim, fontSize: 13, fontWeight: '600' },
-  presetTxtActive: { color: C.red, fontWeight: '700' },
+  presetTxtActive: { color: C.grn, fontWeight: '700' },
 
   // ── Summary card
   summaryCard: {
@@ -1304,7 +1314,7 @@ const SM = StyleSheet.create({
 
   // ── Submit
   submitBtn: {
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 20,
     paddingVertical: 18,
     flexDirection: 'row',
@@ -1313,11 +1323,11 @@ const SM = StyleSheet.create({
     gap: 10,
     marginTop: 6,
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.55, shadowRadius: 18 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.55, shadowRadius: 18 },
       android: { elevation: 14 },
     }),
   },
-  submitTxt: { color: C.wh, fontSize: 16, fontWeight: '800', letterSpacing: 0.2 },
+  submitTxt: { color: '#0f1419', fontSize: 16, fontWeight: '800', letterSpacing: 0.2 },
 
   // ── Legal
   legalTxt: { color: C.dim, fontSize: 11, textAlign: 'center', lineHeight: 16, marginTop: -4 },
@@ -1331,12 +1341,12 @@ const SA = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     maxHeight: '88%',
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(0,0,0,0.08)',
     ...Platform.select({
       ios:     { shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.55, shadowRadius: 24 },
       android: { elevation: 32 },
@@ -1344,7 +1354,7 @@ const SA = StyleSheet.create({
   },
   handle: {
     width: 40, height: 4, borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(0,0,0,0.12)',
     alignSelf: 'center', marginTop: 12, marginBottom: 4,
   },
 
@@ -1352,7 +1362,7 @@ const SA = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 16,
-    borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+    borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
   iconWrap: {
@@ -1365,19 +1375,19 @@ const SA = StyleSheet.create({
   subtitle: { color: C.gr, fontSize: 12, fontWeight: '400', marginTop: 2 },
   closeBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center', justifyContent: 'center',
   },
 
   // ── Trajet info row
   trajetInfo: {
     flexDirection: 'row', gap: 10, paddingHorizontal: 20, paddingVertical: 12,
-    borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
+    borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
   },
   trajetPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
   },
   trajetPillTxt: { color: C.gr, fontSize: 12, fontWeight: '500' },
@@ -1409,8 +1419,8 @@ const SA = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 40, gap: 12 },
   emptyIconWrap: {
     width: 72, height: 72, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center', justifyContent: 'center',
   },
   emptyTitle: { color: C.wh, fontSize: 16, fontWeight: '700' },
@@ -1422,9 +1432,9 @@ const SA = StyleSheet.create({
   // ── Colis card
   colisCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f5f8f5',
     borderRadius: 16, padding: 14,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)',
     ...Platform.select({
       ios:     { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 8 },
       android: { elevation: 3 },
@@ -1437,7 +1447,7 @@ const SA = StyleSheet.create({
 
   radio: {
     width: 22, height: 22, borderRadius: 11,
-    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.18)',
     alignItems: 'center', justifyContent: 'center',
   },
   radioSelected: {
@@ -1463,6 +1473,6 @@ const SA = StyleSheet.create({
       android: { elevation: 10 },
     }),
   },
-  assignBtnDisabled: { backgroundColor: '#1a1a1a', opacity: 0.55 },
+  assignBtnDisabled: { backgroundColor: '#f5f8f5', opacity: 0.55 },
   assignBtnTxt: { color: C.wh, fontSize: 15, fontWeight: '800', letterSpacing: 0.2 },
 });

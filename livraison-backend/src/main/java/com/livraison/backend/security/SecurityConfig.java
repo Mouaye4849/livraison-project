@@ -34,8 +34,9 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain webSocketFilterChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/chat/**", "/ws/**", "/topic/**", "/app/**")
+            .securityMatcher("/chat/**", "/ws", "/ws/**", "/topic/**", "/app/**")
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
@@ -62,6 +63,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/diag/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

@@ -16,14 +16,25 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authService } from '@/services/auth.service';
+import { trajetService } from '@/services/trajet.service';
+import { useGpsSharing } from '@/hooks/useGpsSharing';
+import type { Colis } from '@/types';
+
+// Invisible component — keeps GPS sharing alive for ONE EN_COURS colis
+// regardless of which screen the voyageur is currently on.
+function GpsBroadcastSlot({ colisId }: { colisId: string }) {
+  useGpsSharing(colisId, true);
+  return null;
+}
 
 const C = {
-  bg:   '#0a0a0a',
-  bar:  '#0d0d0d',
-  red:  '#dc2626',
-  gray: '#4b5563',
-  wh:   '#ffffff',
-  bd:   'rgba(255,255,255,0.06)',
+  bg:    '#eef1ee',
+  bar:   'rgba(11,17,30,0.97)',
+  grn:   '#22c55e',
+  grnDk: '#166534',
+  gray:  '#6b7280',
+  wh:    '#f0f6fc',
+  bd:    'rgba(255,255,255,0.09)',
 } as const;
 
 const TABS = [
@@ -61,7 +72,7 @@ function TabItem({
         <Ionicons
           name={(isFocused ? tab.activeIcon : tab.icon) as any}
           size={20}
-          color={isFocused ? C.wh : C.gray}
+          color={isFocused ? '#0f1419' : C.gray}
         />
         {isFocused && <Text style={S.pillLabel}>{tab.label}</Text>}
       </Animated.View>
@@ -86,37 +97,77 @@ function CustomTabBar({ state, navigation }: any) {
 }
 
 export default function DashboardLayout() {
-  const [ready, setReady] = useState(false);
+  const [ready,         setReady]         = useState(false);
+  const [isVoyageur,   setIsVoyageur]     = useState(false);
+  const [activeColisIds, setActiveColisIds] = useState<string[]>([]);
 
+  // Auth check — runs once on mount
   useEffect(() => {
-    authService.isAuthenticated().then((ok) => {
-      if (!ok) router.replace('/(tabs)');
-      else setReady(true);
+    authService.isAuthenticated().then(async (ok) => {
+      if (!ok) { router.replace('/(tabs)'); return; }
+      const session = await authService.getSession();
+      setIsVoyageur(session?.role === 'ROLE_VOYAGEUR');
+      setReady(true);
     });
   }, []);
+
+  // Keep the list of EN_COURS colis up to date so GPS broadcast slots stay alive.
+  // Polls every 30 s; also refreshes immediately when isVoyageur becomes true.
+  useEffect(() => {
+    if (!isVoyageur) return;
+
+    const refresh = () => {
+      trajetService.getMyTrajets()
+        .then((trajets) => {
+          const ids: string[] = [];
+          trajets.forEach((t) => {
+            (t.colis ?? []).forEach((c: Colis) => {
+              if (c.statut === 'EN_COURS') ids.push(c.id);
+            });
+          });
+          setActiveColisIds((prev) => {
+            const same = prev.length === ids.length && prev.every((id, i) => id === ids[i]);
+            return same ? prev : ids;
+          });
+        })
+        .catch(() => { /* silent — GPS sharing continues with last known list */ });
+    };
+
+    refresh();
+    const timer = setInterval(refresh, 30_000);
+    return () => clearInterval(timer);
+  }, [isVoyageur]);
 
   if (!ready) {
     return (
       <View style={{ flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={C.red} size="large" />
+        <ActivityIndicator color={C.grn} size="large" />
       </View>
     );
   }
 
   return (
-    <Tabs
-      tabBar={(props: any) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
-      <Tabs.Screen name="home" />
-      <Tabs.Screen name="colis" />
-      <Tabs.Screen name="voyages" />
-      <Tabs.Screen name="messages" />
-      <Tabs.Screen name="profile" />
-      <Tabs.Screen name="paiement"       options={{ href: null }} />
-      <Tabs.Screen name="paiements"      options={{ href: null }} />
-      <Tabs.Screen name="notifications"  options={{ href: null }} />
-    </Tabs>
+    <>
+      {/* One invisible GPS broadcaster per EN_COURS colis — persists across navigation */}
+      {activeColisIds.map((id) => (
+        <GpsBroadcastSlot key={id} colisId={id} />
+      ))}
+
+      <Tabs
+        tabBar={(props: any) => <CustomTabBar {...props} />}
+        screenOptions={{ headerShown: false }}
+      >
+        <Tabs.Screen name="home" />
+        <Tabs.Screen name="colis" />
+        <Tabs.Screen name="voyages" />
+        <Tabs.Screen name="messages" />
+        <Tabs.Screen name="profile" />
+        <Tabs.Screen name="paiement"            options={{ href: null }} />
+        <Tabs.Screen name="paiements"           options={{ href: null }} />
+        <Tabs.Screen name="notifications"       options={{ href: null }} />
+        <Tabs.Screen name="tracking/[colisId]"  options={{ href: null }} />
+      </Tabs>
+    </>
   );
 }
 
@@ -144,16 +195,16 @@ const S = StyleSheet.create({
     paddingVertical: 9,
   },
   pillActive: {
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.50, shadowRadius: 10 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.60, shadowRadius: 12 },
       android: { elevation: 8 },
     }),
   },
   pillLabel: {
-    color: C.wh,
+    color: '#0f1419',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.1,
   },
 });

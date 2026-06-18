@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+// [DEBUG] — remove after diagnosis
+import org.springframework.security.core.context.SecurityContextHolder;
+
 @RestController
 @RequestMapping("/api/colis")
 @RequiredArgsConstructor
@@ -112,6 +115,12 @@ public class ColisController {
     public ResponseEntity<ColisResponseDTO> assign(
             @PathVariable UUID colisId,
             @PathVariable UUID trajetId) {
+
+        // [DEBUG] — remove after diagnosis
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("[ASSIGN endpoint] called → colisId=" + colisId + " trajetId=" + trajetId);
+        System.out.println("[ASSIGN endpoint] authentication=" + auth);
+        System.out.println("[ASSIGN endpoint] authorities=" + (auth != null ? auth.getAuthorities() : "NULL"));
 
         return ResponseEntity.ok(
                 colisService.assignTrajet(colisId, trajetId)

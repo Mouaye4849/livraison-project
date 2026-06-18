@@ -9,6 +9,7 @@ import com.livraison.backend.repository.ColisRepository;
 import com.livraison.backend.repository.PaiementRepository;
 import com.livraison.backend.repository.TrajetRepository;
 import com.livraison.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ColisServiceImpl implements ColisService {
 
@@ -25,6 +27,7 @@ public class ColisServiceImpl implements ColisService {
     private final TrajetRepository trajetRepository;
     private final NotificationService notificationService;
     private final PaiementRepository paiementRepository;
+    private final TrackingService trackingService;
 
 
     private User getCurrentUser() {
@@ -46,6 +49,13 @@ public class ColisServiceImpl implements ColisService {
         colis.setUser(user);
 
         Colis saved = colisRepository.save(colis);
+
+        trackingService.createEvent(
+                saved,
+                "COLIS_CREE",
+                "Colis créé avec succès",
+                saved.getVilleDepart()
+        );
 
         notificationService.createNotification(
                 user,
@@ -70,6 +80,11 @@ public class ColisServiceImpl implements ColisService {
         Trajet trajet = trajetRepository.findById(trajetId)
                 .orElseThrow(() -> new ResourceNotFoundException("Trajet introuvable"));
 
+        // DEBUG: vérifier les données avant assignation
+        System.out.println("[ASSIGN] colisId=" + colisId + " | trajetId=" + trajet.getId());
+        System.out.println("[ASSIGN] colis.statut=" + colis.getStatut() + " | trajet.statut=" + trajet.getStatut());
+        System.out.println("[ASSIGN] colis.trajet avant=" + colis.getTrajet());
+
         // 🔐 vérifier propriétaire
         if (!trajet.getVoyageur().getId().equals(currentUser.getId())) {
             throw new BusinessException("Accès refusé");
@@ -89,12 +104,9 @@ public class ColisServiceImpl implements ColisService {
             throw new BusinessException("Capacité insuffisante");
         }
 
-        // =============================
-        // ✅ IMPORTANT: get owner safely
-        // =============================
+        // ✅ get owner safely
         User owner = userRepository.findById(colis.getUser().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User introuvable"));
-
 
         colis.setTrajet(trajet);
         colis.setStatut(StatutColis.ACCEPTE);
@@ -105,12 +117,23 @@ public class ColisServiceImpl implements ColisService {
             trajet.setStatut(TrajetStatut.COMPLET);
         }
 
-        colisRepository.save(colis);
+        Colis savedColis = colisRepository.save(colis);
         trajetRepository.save(trajet);
 
-        // =============================
-        // 🔔 SAME LOGIC AS CREATE
-        // =============================
+        // DEBUG: vérifier après sauvegarde
+        System.out.println("[ASSIGN] colis.trajet après save=" + savedColis.getTrajet());
+        System.out.println("[ASSIGN] colis.statut après save=" + savedColis.getStatut());
+        System.out.println("[ASSIGN] trajet.id confirmé=" + trajet.getId());
+
+        // 📍 Tracking event
+        trackingService.createEvent(
+                savedColis,
+                "COLIS_ACCEPTE",
+                "Votre colis a été accepté par un voyageur",
+                trajet.getOrigine()
+        );
+
+        // 🔔 Notifications
         notificationService.createNotification(
                 owner,
                 "Votre colis a été accepté par un voyageur ",
@@ -119,7 +142,7 @@ public class ColisServiceImpl implements ColisService {
 
         notificationService.notifyAdmin("Colis accepte par un voyageur", TypeNotification.SYSTEME);
 
-        return mapToResponseDTO(colis);
+        return mapToResponseDTO(savedColis);
     }
 
     @Override
@@ -243,7 +266,15 @@ public class ColisServiceImpl implements ColisService {
 
         colis.setStatut(StatutColis.EN_COURS);
 
-        colisRepository.save(colis);
+        Colis saved = colisRepository.save(colis);
+
+        // 📍 Tracking event
+        trackingService.createEvent(
+                saved,
+                "EN_COURS",
+                "Votre colis est en cours de livraison",
+                saved.getTrajet().getOrigine()
+        );
 
         // 🔔 notification
         notificationService.createNotification(
@@ -252,7 +283,7 @@ public class ColisServiceImpl implements ColisService {
                 TypeNotification.SYSTEME
         );
 
-        return mapToResponseDTO(colis);
+        return mapToResponseDTO(saved);
     }
 
     @Override
@@ -286,8 +317,15 @@ public class ColisServiceImpl implements ColisService {
 
         colis.setStatut(StatutColis.LIVRE);
 
-        colisRepository.save(colis);
+        Colis saved = colisRepository.save(colis);
 
+        // 📍 Tracking event
+        trackingService.createEvent(
+                saved,
+                "LIVRE",
+                "Votre colis a été livré avec succès",
+                saved.getVilleArrivee()
+        );
 
         notificationService.createNotification(
                 colis.getUser(),
@@ -297,7 +335,7 @@ public class ColisServiceImpl implements ColisService {
 
         notificationService.notifyAdmin("Colis livre", TypeNotification.SYSTEME);
 
-        return mapToResponseDTO(colis);
+        return mapToResponseDTO(saved);
     }
 
     @Override
@@ -317,9 +355,17 @@ public class ColisServiceImpl implements ColisService {
 
         colis.setStatut(StatutColis.ANNULE);
 
-        colisRepository.save(colis);
+        Colis saved = colisRepository.save(colis);
 
-        return mapToResponseDTO(colis);
+        // 📍 Tracking event
+        trackingService.createEvent(
+                saved,
+                "ANNULE",
+                "Le colis a été annulé",
+                saved.getVilleDepart()
+        );
+
+        return mapToResponseDTO(saved);
     }
 
 
@@ -350,9 +396,9 @@ public class ColisServiceImpl implements ColisService {
 
         colis.setStatut(StatutColis.ANNULE);
 
-        colisRepository.save(colis);
+        Colis saved = colisRepository.save(colis);
 
-        return mapToResponseDTO(colis);
+        return mapToResponseDTO(saved);
     }
 
 
@@ -404,13 +450,23 @@ public class ColisServiceImpl implements ColisService {
 
         colis.setStatut(StatutColis.PUBLIE);
 
+        Colis saved = colisRepository.save(colis);
+
+        // 📍 Tracking event
+        trackingService.createEvent(
+                saved,
+                "COLIS_PUBLIE",
+                "Votre colis est maintenant public et disponible pour les voyageurs",
+                saved.getVilleDepart()
+        );
+
         notificationService.createNotification(
                 currentUser,
                 "Votre colis est maintenant public",
                 TypeNotification.SYSTEME
         );
 
-        return mapToResponseDTO(colisRepository.save(colis));
+        return mapToResponseDTO(saved);
     }
 
 
@@ -442,7 +498,6 @@ public class ColisServiceImpl implements ColisService {
                 .trajetId(colis.getTrajet() != null ? colis.getTrajet().getId() : null)
                 .villeDepart(colis.getVilleDepart())
                 .villeArrivee(colis.getVilleArrivee())
-
                 .paid(isPaid)
                 .build();
     }

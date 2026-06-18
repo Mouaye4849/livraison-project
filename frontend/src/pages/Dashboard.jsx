@@ -21,6 +21,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useI18n } from "../i18n/index.jsx";
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 
@@ -64,10 +65,11 @@ function StatCard({ title, value, subtitle, icon: Icon, accentColor }) {
 // ─── StatusBadge ──────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }) {
+  const { t } = useI18n();
   const map = {
-    EN_COURS: { label: "En cours", cls: "bg-yellow-500/10 text-yellow-500 border-yellow-500/25" },
-    ACCEPTE:  { label: "Accepté",  cls: "bg-blue-500/10  text-blue-500  border-blue-500/25"  },
-    LIVRE:    { label: "Livré",    cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25" },
+    EN_COURS: { label: t("dashboard.statusInProgress"), cls: "bg-yellow-500/10 text-yellow-500 border-yellow-500/25" },
+    ACCEPTE:  { label: t("dashboard.statusAccepted"),  cls: "bg-blue-500/10  text-blue-500  border-blue-500/25"  },
+    LIVRE:    { label: t("dashboard.statusDelivered"),    cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25" },
   };
 
   const { label, cls } = map[status] ?? {
@@ -86,11 +88,12 @@ function StatusBadge({ status }) {
 // ─── CustomTooltip ────────────────────────────────────────────────────────────
 
 function CustomTooltip({ active, payload, label }) {
+  const { t } = useI18n();
   if (!active || !payload?.length) return null;
   return (
     <div className="dark:bg-[#1c1c1c] bg-white dark:border-gray-700 border-gray-200 border rounded-xl px-3 py-2.5 text-xs dark:shadow-2xl shadow-lg">
       <p className="dark:text-gray-400 text-gray-500 mb-0.5">{label}</p>
-      <p className="dark:text-white text-gray-900 font-semibold">{payload[0].value} livraisons</p>
+      <p className="dark:text-white text-gray-900 font-semibold">{payload[0].value} {t("dashboard.chartDeliveries")}</p>
     </div>
   );
 }
@@ -98,6 +101,7 @@ function CustomTooltip({ active, payload, label }) {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
+  const { t } = useI18n();
   const [orders, setOrders]     = useState([]);
   const [loading, setLoading]   = useState(true);
   const [activeBar, setActiveBar] = useState(null);
@@ -120,50 +124,50 @@ export default function Dashboard() {
 
   const stats = [
     {
-      title: "Livraisons",
+      title: t("dashboard.statDeliveries"),
       value: orders.length,
-      subtitle: "Aujourd'hui",
+      subtitle: t("dashboard.statToday"),
       icon: Truck,
       accentColor: "bg-gradient-to-r from-blue-600 to-blue-800",
     },
     {
-      title: "En cours",
+      title: t("dashboard.statInProgress"),
       value: orders.filter((o) => o.statut === "EN_COURS").length,
-      subtitle: "Actif maintenant",
+      subtitle: t("dashboard.statActiveNow"),
       icon: Clock,
       accentColor: "bg-gradient-to-r from-yellow-500 to-orange-500",
     },
     {
-      title: "Taux de succès",
+      title: t("dashboard.statSuccessRate"),
       value: "96%",
-      subtitle: "Performance globale",
+      subtitle: t("dashboard.statGlobalPerf"),
       icon: TrendingUp,
       accentColor: "bg-gradient-to-r from-emerald-500 to-teal-600",
     },
     {
-      title: "Revenus",
+      title: t("dashboard.statRevenue"),
       value: "84 200 MRU",
-      subtitle: "Ce mois-ci",
+      subtitle: t("dashboard.statThisMonth"),
       icon: Wallet,
       accentColor: "bg-gradient-to-r from-red-500 to-red-700",
     },
   ];
 
   const chartData = [
-    { name: "Lun", value: 10 },
-    { name: "Mar", value: 20 },
-    { name: "Mer", value: 15 },
-    { name: "Jeu", value: 25 },
-    { name: "Ven", value: 30 },
-    { name: "Sam", value: 18 },
-    { name: "Dim", value: 35 },
+    { name: t("dashboard.days.mon"), value: 10 },
+    { name: t("dashboard.days.tue"), value: 20 },
+    { name: t("dashboard.days.wed"), value: 15 },
+    { name: t("dashboard.days.thu"), value: 25 },
+    { name: t("dashboard.days.fri"), value: 30 },
+    { name: t("dashboard.days.sat"), value: 18 },
+    { name: t("dashboard.days.sun"), value: 35 },
   ];
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3 dark:text-gray-500 text-gray-400">
         <Loader2 size={28} className="animate-spin text-red-500" />
-        <p className="text-sm">Chargement des données…</p>
+        <p className="text-sm">{t("dashboard.loadingData")}</p>
       </div>
     );
   }
@@ -172,13 +176,13 @@ export default function Dashboard() {
     <div className="min-h-screen p-0 space-y-6 font-sans">
 
       {/* ── Page header ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold tracking-tight dark:text-white text-gray-900">
-            Tableau de bord
+            {t("dashboard.title")}
           </h1>
           <p className="text-sm dark:text-gray-500 text-gray-400 mt-0.5">
-            Vue d'ensemble de vos livraisons
+            {t("dashboard.subtitle")}
           </p>
         </div>
 
@@ -196,12 +200,12 @@ export default function Dashboard() {
           "
         >
           <ArrowUpRight size={14} />
-          Actualiser
+          {t("dashboard.refresh")}
         </button>
       </div>
 
       {/* ── Stats grid ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => <StatCard key={i} {...stat} />)}
       </div>
 
@@ -213,12 +217,12 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-sm font-semibold dark:text-white text-gray-900">
-                Livraisons par jour
+                {t("dashboard.chartTitle")}
               </h2>
-              <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Cette semaine</p>
+              <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{t("dashboard.chartWeek")}</p>
             </div>
             <span className="text-xs bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2.5 py-1 rounded-full font-semibold">
-              +12% vs sem. passée
+              {t("dashboard.chartGrowth")}
             </span>
           </div>
 
@@ -263,8 +267,8 @@ export default function Dashboard() {
             <MapPin size={20} className="text-blue-500" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium dark:text-gray-300 text-gray-700">Carte interactive</p>
-            <p className="text-xs dark:text-gray-600 text-gray-400 mt-0.5">Bientôt disponible</p>
+            <p className="text-sm font-medium dark:text-gray-300 text-gray-700">{t("dashboard.mapTitle")}</p>
+            <p className="text-xs dark:text-gray-600 text-gray-400 mt-0.5">{t("dashboard.mapSoon")}</p>
           </div>
         </div>
       </div>
@@ -280,10 +284,10 @@ export default function Dashboard() {
             </div>
             <div>
               <h2 className="text-sm font-semibold dark:text-white text-gray-900">
-                Livraisons actives
+                {t("dashboard.activeOrders")}
               </h2>
               <p className="text-xs dark:text-gray-500 text-gray-400">
-                {orders.length} colis en traitement
+                {orders.length} {t("dashboard.colisInProgress")}
               </p>
             </div>
           </div>
@@ -293,14 +297,14 @@ export default function Dashboard() {
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3 dark:text-gray-600 text-gray-400">
             <Package size={32} strokeWidth={1.5} />
-            <p className="text-sm">Aucun colis actif pour le moment</p>
+            <p className="text-sm">{t("dashboard.noActiveColis")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left dark:border-b dark:border-gray-800/60 border-b border-gray-100">
-                  {["Commande", "Trajet", "Statut", "Prix"].map((h) => (
+                  {[t("dashboard.tableOrder"), t("dashboard.tableTrajet"), t("dashboard.tableStatus"), t("dashboard.tablePrice")].map((h) => (
                     <th key={h} className="px-6 py-3 text-[11px] font-semibold dark:text-gray-500 text-gray-400 uppercase tracking-widest">
                       {h}
                     </th>

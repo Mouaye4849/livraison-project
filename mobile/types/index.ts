@@ -127,6 +127,16 @@ export interface Paiement {
   montantVoyageur: number;
 }
 
+// ─── GPS ──────────────────────────────────────────────────────────────────────
+
+export interface GpsLocation {
+  id: string | null;
+  colisId: string;
+  latitude: number;
+  longitude: number;
+  createdAt: string;
+}
+
 // ─── Notification ─────────────────────────────────────────────────────────────
 
 export interface Notification {

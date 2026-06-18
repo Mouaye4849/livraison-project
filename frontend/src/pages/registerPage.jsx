@@ -4,11 +4,13 @@ import { Mail, Lock, User } from "lucide-react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import api from "../api";
+import { useI18n, LanguageSelector } from "../i18n/index.jsx";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const role = location.state?.role;
+    const { t } = useI18n();
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -19,28 +21,12 @@ export default function RegisterPage() {
     const handleGoogleSignup = async () => {
         try {
             const result = await signInWithPopup(auth, provider);
-
             const user = result.user;
-
-
-            const googleData = {
-                name: user.displayName,
-                email: user.email,
-                googleId: user.uid,
-            };
-
-
+            const googleData = { name: user.displayName, email: user.email, googleId: user.uid };
             const res = await api.post("/auth/google", googleData);
-
-
             localStorage.setItem("token", res.data.token);
-            localStorage.setItem("user", JSON.stringify({
-                role: res.data.role
-            }));
-
-
+            localStorage.setItem("user", JSON.stringify({ role: res.data.role }));
             navigate("/dashboard");
-
         } catch (err) {
             console.error(err);
         }
@@ -50,24 +36,17 @@ export default function RegisterPage() {
         e.preventDefault();
         setError("");
 
-        if (name.length < 2) return setError("Le nom doit contenir au moins 2 caracteres");
-        if (!email.includes("@")) return setError("Email invalide");
-        if (password.length < 6)
-            return setError("Le mot de passe doit contenir au moins 6 caracteres");
+        if (name.length < 2) return setError(t("register.nameMin"));
+        if (!email.includes("@")) return setError(t("register.invalidEmail"));
+        if (password.length < 6) return setError(t("register.passwordMin"));
 
         try {
             setLoading(true);
-
-            const endpoint =
-                role === "VOYAGEUR"
-                    ? "/auth/register/voyageur"
-                    : "/auth/register/client";
-
+            const endpoint = role === "VOYAGEUR" ? "/auth/register/voyageur" : "/auth/register/client";
             await api.post(endpoint, { name, email, password });
-
             navigate("/login", { state: { role } });
         } catch (err) {
-            setError(err.response?.data?.message || "Register failed");
+            setError(err.response?.data?.message || t("register.failed"));
         } finally {
             setLoading(false);
         }
@@ -76,63 +55,48 @@ export default function RegisterPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 px-4">
 
+            {/* Language selector — top right */}
+            <div className="fixed top-4 end-4 z-50">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-1">
+                    <LanguageSelector variant="dashboard" />
+                </div>
+            </div>
+
             <form
                 onSubmit={handleRegister}
                 className="w-full max-w-md bg-white shadow-xl rounded-2xl px-8 py-10 space-y-5"
             >
-                {/* LOGO */}
                 <div className="flex justify-center">
-                    <img
-                        src="/logo.png"
-                        alt="Logo"
-                        className="w-34 object-contain"
-                    />
+                    <img src="/logo.png" alt="Logo" className="w-34 object-contain" />
                 </div>
 
-                {/* TITLE */}
                 <div className="text-center">
-                    <h1 className="text-gray-900 text-2xl font-semibold">
-                        Create account
-                    </h1>
-                    <p className="text-gray-500 text-sm mt-1">
-                        Join WASALI platform
-                    </p>
+                    <h1 className="text-gray-900 text-2xl font-semibold">{t("register.title")}</h1>
+                    <p className="text-gray-500 text-sm mt-1">{t("register.subtitle")}</p>
                 </div>
 
-                {/* GOOGLE BUTTON */}
                 <button
                     type="button"
                     onClick={handleGoogleSignup}
                     className="w-full flex items-center justify-center gap-3 border border-gray-300 h-11 rounded-full bg-white hover:bg-gray-100 transition"
                 >
-                    <img
-                        src="https://www.svgrepo.com/show/475656/google-color.svg"
-                        alt="google"
-                        className="w-5 h-5"
-                    />
-                    <span className="text-gray-700 font-medium">
-                        Sign up with Google
-                    </span>
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="google" className="w-5 h-5" />
+                    <span className="text-gray-700 font-medium">{t("register.googleBtn")}</span>
                 </button>
 
-                {/* OR */}
                 <div className="flex items-center gap-3">
-                    <div className="flex-1 h-px bg-gray-300"></div>
-                    <span className="text-gray-400 text-sm">or</span>
-                    <div className="flex-1 h-px bg-gray-300"></div>
+                    <div className="flex-1 h-px bg-gray-300" />
+                    <span className="text-gray-400 text-sm">{t("register.or")}</span>
+                    <div className="flex-1 h-px bg-gray-300" />
                 </div>
 
-                {/* ERROR */}
-                {error && (
-                    <p className="text-red-500 text-sm text-center">{error}</p>
-                )}
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-                {/* NAME */}
                 <div className="flex items-center bg-gray-100 h-12 rounded-full px-4 gap-2">
                     <User size={16} className="text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Full name"
+                        placeholder={t("register.namePlaceholder")}
                         className="w-full bg-transparent outline-none"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -140,12 +104,11 @@ export default function RegisterPage() {
                     />
                 </div>
 
-                {/* EMAIL */}
                 <div className="flex items-center bg-gray-100 h-12 rounded-full px-4 gap-2">
                     <Mail size={16} className="text-gray-400" />
                     <input
                         type="email"
-                        placeholder="Email address"
+                        placeholder={t("register.emailPlaceholder")}
                         className="w-full bg-transparent outline-none"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -153,12 +116,11 @@ export default function RegisterPage() {
                     />
                 </div>
 
-                {/* PASSWORD */}
                 <div className="flex items-center bg-gray-100 h-12 rounded-full px-4 gap-2">
                     <Lock size={16} className="text-gray-400" />
                     <input
                         type="password"
-                        placeholder="Password"
+                        placeholder={t("register.passwordPlaceholder")}
                         className="w-full bg-transparent outline-none"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -166,29 +128,24 @@ export default function RegisterPage() {
                     />
                 </div>
 
-                {/* ROLE */}
                 <p className="text-xs text-gray-500 text-center">
-                    {role === "VOYAGEUR"
-                        ? "Compte Voyageur 🚚"
-                        : "Compte Client 👤"}
+                    {role === "VOYAGEUR" ? t("register.roleVoyageur") : t("register.roleClient")}
                 </p>
 
-                {/* BUTTON */}
                 <button
                     type="submit"
                     className="mt-6 w-full h-11 rounded-full text-white bg-red-600 hover:bg-red-700 transition"
                 >
-                    {loading ? "Loading..." : "Créer un compte"}
+                    {loading ? t("register.loading") : t("register.submit")}
                 </button>
 
-                {/* LOGIN */}
                 <p className="text-gray-500 text-sm text-center">
-                    Already have an account?
+                    {t("register.alreadyAccount")}{" "}
                     <span
                         onClick={() => navigate("/login")}
                         className="text-red-600 cursor-pointer hover:underline"
                     >
-                        Login
+                        {t("register.loginLink")}
                     </span>
                 </p>
             </form>

@@ -6,7 +6,7 @@ import {
     Sun, Moon, Settings, PanelLeftClose, PanelLeft,
 } from "lucide-react";
 import NotificationBell from "../components/NotificationBell";
-
+import { useI18n, LanguageSelector } from "../i18n";
 /* ─────────────────────────────────────────────
    THEMES
 ───────────────────────────────────────────── */
@@ -51,24 +51,6 @@ const THEMES = {
     },
 };
 
-/* ─────────────────────────────────────────────
-   NAV ITEMS
-───────────────────────────────────────────── */
-const NAV_ITEMS = [
-    { icon: BarChart3, label: "Dashboard", path: "/admin/dashboard" },
-    { icon: Box, label: "Tous les colis", path: "/admin/colis" },
-    { icon: Users, label: "Utilisateurs", path: "/admin/users" },
-    { icon: Truck, label: "Trajets", path: "/admin/trajets" },
-    { icon: Truck, label: "Pending Trajets", path: "/admin/trajets/pending", badge: "!" },
-];
-
-const PAGE_TITLES = {
-    "/admin/dashboard": "Dashboard",
-    "/admin/colis": "Tous les colis",
-    "/admin/users": "Utilisateurs",
-    "/admin/trajets": "Trajets",
-    "/admin/trajets/pending": "Pending Trajets",
-};
 
 /* ─────────────────────────────────────────────
    NAV ITEM
@@ -153,19 +135,35 @@ function NavItem({ item, active, collapsed, theme, onClick }) {
 /* ─────────────────────────────────────────────
    SIDEBAR
 ───────────────────────────────────────────── */
-function Sidebar({ theme, navigate, currentPath, collapsed, toggle, logout }) {
+function Sidebar({
+    navItems,
+    theme,
+    navigate,
+    currentPath,
+    collapsed,
+    toggle,
+    logout,
+    isMobile,
+    mobileOpen,
+}) {
+    const { t } = useI18n();
     return (
         <aside style={{
-            width: collapsed ? 68 : 230,
-            minWidth: collapsed ? 68 : 230,
+            width: isMobile ? 230 : (collapsed ? 68 : 230),
+            minWidth: isMobile ? 230 : (collapsed ? 68 : 230),
             background: theme.sidebarBg,
             borderRight: `1px solid ${theme.border}`,
             display: "flex",
             flexDirection: "column",
             padding: "16px 10px",
-            transition: "width 0.28s cubic-bezier(.4,0,.2,1), min-width 0.28s cubic-bezier(.4,0,.2,1)",
+            transition: "width 0.28s cubic-bezier(.4,0,.2,1), min-width 0.28s cubic-bezier(.4,0,.2,1), transform 0.3s cubic-bezier(.4,0,.2,1)",
             overflow: "hidden",
-            position: "relative",
+            position: isMobile ? "fixed" : "relative",
+            top: isMobile ? 0 : undefined,
+            bottom: isMobile ? 0 : undefined,
+            left: 0,
+            zIndex: isMobile ? 50 : "auto",
+            transform: isMobile ? `translateX(${mobileOpen ? 0 : -230}px)` : "none",
         }}>
 
             {/* LOGO */}
@@ -197,7 +195,7 @@ function Sidebar({ theme, navigate, currentPath, collapsed, toggle, logout }) {
                             Wasali
                         </div>
                         <div style={{ fontSize: 10, color: theme.sub, marginTop: 1 }}>
-                            Admin Panel
+                            {t("admin.panel")}
                         </div>
                     </div>
                 )}
@@ -215,11 +213,11 @@ function Sidebar({ theme, navigate, currentPath, collapsed, toggle, logout }) {
                         marginBottom: 6,
                         textTransform: "uppercase",
                     }}>
-                        Navigation
+                        {t("admin.navigation")}
                     </p>
                 )}
 
-                {NAV_ITEMS.map(item => (
+                {navItems.map(item => (
                     <NavItem
                         key={item.path}
                         item={item}
@@ -240,7 +238,11 @@ function Sidebar({ theme, navigate, currentPath, collapsed, toggle, logout }) {
                 {/* COLLAPSE TOGGLE */}
                 <button
                     onClick={toggle}
-                    title={collapsed ? "Développer" : "Réduire"}
+                    title={
+                        collapsed
+                            ? t("admin.expand")
+                            : t("admin.collapse")
+                    }
                     style={{
                         marginTop: 6,
                         width: "100%",
@@ -269,6 +271,7 @@ function Sidebar({ theme, navigate, currentPath, collapsed, toggle, logout }) {
 }
 
 function LogoutBtn({ collapsed, theme, logout }) {
+    const { t } = useI18n();
     const [hovered, setHovered] = useState(false);
     return (
         <button
@@ -292,7 +295,7 @@ function LogoutBtn({ collapsed, theme, logout }) {
             }}
         >
             <LogOut size={17} style={{ flexShrink: 0 }} />
-            {!collapsed && "Déconnexion"}
+            {!collapsed && t("common.logout")}
         </button>
     );
 }
@@ -304,12 +307,13 @@ function LayoutHeader({ title, onMenuToggle, onLogout, theme, toggleTheme, theme
     const [dropOpen, setDropOpen] = useState(false);
     const [themeHover, setThemeHover] = useState(false);
     const ref = useRef();
+    const { t } = useI18n();
 
     const user = (() => {
         try { return JSON.parse(localStorage.getItem("user")) || {}; } catch { return {}; }
     })();
     const email = user.email || "admin@wasali.com";
-    const role = user.role || "Administrateur";
+    const role = user.role || t("admin.administrator");
     const initials = email.charAt(0).toUpperCase();
 
     useEffect(() => {
@@ -380,7 +384,11 @@ function LayoutHeader({ title, onMenuToggle, onLogout, theme, toggleTheme, theme
                     onClick={toggleTheme}
                     onMouseEnter={() => setThemeHover(true)}
                     onMouseLeave={() => setThemeHover(false)}
-                    title={themeMode === "dark" ? "Mode clair" : "Mode sombre"}
+                    title={
+                        themeMode === "dark"
+                            ? t("common.lightMode")
+                            : t("common.darkMode")
+                    }
                     style={{
                         padding: 8,
                         borderRadius: 9,
@@ -400,6 +408,7 @@ function LayoutHeader({ title, onMenuToggle, onLogout, theme, toggleTheme, theme
                 </button>
 
                 {/* NOTIFICATIONS */}
+                <LanguageSelector />
                 <NotificationBell />
 
                 {/* PROFILE DROPDOWN */}
@@ -504,12 +513,16 @@ function LayoutHeader({ title, onMenuToggle, onLogout, theme, toggleTheme, theme
                             </div>
 
                             {/* SETTINGS */}
-                            <DropBtn icon={Settings} label="Paramètres" theme={theme} />
+                            <DropBtn
+                                icon={Settings}
+                                label={t("common.settings")}
+                                theme={theme}
+                            />
 
                             {/* LOGOUT */}
                             <DropBtn
                                 icon={LogOut}
-                                label="Déconnexion"
+                                label={t("common.logout")}
                                 theme={theme}
                                 danger
                                 onClick={onLogout}
@@ -560,8 +573,44 @@ function DropBtn({ icon: Icon, label, theme, danger, onClick }) {
 export default function AdminLayout() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useI18n();
+
+    const NAV_ITEMS = [
+        { icon: BarChart3, label: t("admin.dashboard"), path: "/admin/dashboard" },
+        { icon: Box, label: t("admin.allColis"), path: "/admin/colis" },
+        { icon: Users, label: t("admin.users"), path: "/admin/users" },
+        { icon: Truck, label: t("admin.trajets"), path: "/admin/trajets" },
+        {
+            icon: Truck,
+            label: t("admin.pendingTrajets"),
+            path: "/admin/trajets/pending",
+            badge: "!"
+        },
+    ];
+
+    const PAGE_TITLES = {
+        "/admin/dashboard": t("admin.dashboard"),
+        "/admin/colis": t("admin.allColis"),
+        "/admin/users": t("admin.users"),
+        "/admin/trajets": t("admin.trajets"),
+        "/admin/trajets/pending": t("admin.pendingTrajets"),
+    };
+
 
     const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+    // Track viewport width changes
+    useEffect(() => {
+        const handle = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener("resize", handle);
+        return () => window.removeEventListener("resize", handle);
+    }, []);
+
+    // Close mobile drawer on navigation
+    useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
     const [themeMode, setThemeMode] = useState(
         () => localStorage.getItem("theme") || "dark"
     );
@@ -580,6 +629,14 @@ export default function AdminLayout() {
         navigate("/login");
     };
 
+    const handleMenuToggle = () => {
+        if (window.innerWidth < 768) {
+            setMobileOpen(o => !o);
+        } else {
+            setCollapsed(c => !c);
+        }
+    };
+
     return (
         <div style={{
             display: "flex",
@@ -590,14 +647,30 @@ export default function AdminLayout() {
             transition: "background 0.3s, color 0.3s",
         }}>
 
+            {/* Mobile backdrop — tap to close sidebar drawer */}
+            {isMobile && mobileOpen && (
+                <div
+                    onClick={() => setMobileOpen(false)}
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        background: "rgba(0,0,0,0.55)",
+                        zIndex: 49,
+                    }}
+                />
+            )}
+
             {/* SIDEBAR */}
             <Sidebar
+                navItems={NAV_ITEMS}
                 theme={theme}
                 navigate={navigate}
                 currentPath={location.pathname}
                 collapsed={collapsed}
-                toggle={() => setCollapsed(c => !c)}
+                toggle={handleMenuToggle}
                 logout={logout}
+                isMobile={isMobile}
+                mobileOpen={mobileOpen}
             />
 
             {/* CONTENT */}
@@ -605,7 +678,7 @@ export default function AdminLayout() {
 
                 <LayoutHeader
                     title={PAGE_TITLES[location.pathname] || "Admin"}
-                    onMenuToggle={() => setCollapsed(c => !c)}
+                    onMenuToggle={handleMenuToggle}
                     onLogout={logout}
                     theme={theme}
                     toggleTheme={toggleTheme}
@@ -614,8 +687,9 @@ export default function AdminLayout() {
 
                 <main style={{
                     flex: 1,
-                    padding: "24px",
+                    padding: isMobile ? "16px" : "24px",
                     overflowY: "auto",
+                    overflowX: "hidden",
                     background: theme.bg,
                 }}>
                     <Outlet />

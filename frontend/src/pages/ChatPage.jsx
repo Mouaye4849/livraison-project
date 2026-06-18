@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "../api";
 import {
     MessageCircle,
     Send,
@@ -18,7 +19,6 @@ export default function ChatPage() {
     const [content, setContent] = useState("");
     const [recording, setRecording] = useState(false);
 
-    const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
 
     const mediaRecorderRef = useRef(null);
@@ -27,11 +27,8 @@ export default function ChatPage() {
     /* ========================= FETCH MESSAGES ========================== */
     const fetchMessages = async () => {
         try {
-            const res = await fetch(`http://localhost:8080/api/chat/${colisId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            setMessages(data);
+            const res = await api.get(`/chat/${colisId}`);
+            setMessages(res.data);
         } catch (err) {
             console.error("Fetch error:", err);
         }
@@ -51,14 +48,7 @@ export default function ChatPage() {
     const sendMessage = async () => {
         if (!content.trim()) return;
         try {
-            await fetch("http://localhost:8080/api/chat/send", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ colisId, content, type: "TEXT" }),
-            });
+            await api.post("/chat/send", { colisId, content, type: "TEXT" });
             setContent("");
             fetchMessages();
         } catch (err) {
@@ -73,18 +63,12 @@ export default function ChatPage() {
             const formData = new FormData();
             formData.append("file", file);
 
-            const upload = await fetch("http://localhost:8080/api/chat/upload", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
-                body: formData,
+            const upload = await api.post("/chat/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
             });
-            const fileUrl = await upload.text();
+            const fileUrl = upload.data;
 
-            await fetch("http://localhost:8080/api/chat/send", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ colisId, type: "IMAGE", fileUrl }),
-            });
+            await api.post("/chat/send", { colisId, type: "IMAGE", fileUrl });
             fetchMessages();
         } catch (err) {
             console.error("Send image error:", err);
@@ -106,18 +90,12 @@ export default function ChatPage() {
                     const formData = new FormData();
                     formData.append("file", blob);
 
-                    const upload = await fetch("http://localhost:8080/api/chat/upload", {
-                        method: "POST",
-                        headers: { Authorization: `Bearer ${token}` },
-                        body: formData,
+                    const upload = await api.post("/chat/upload", formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
                     });
-                    const fileUrl = await upload.text();
+                    const fileUrl = upload.data;
 
-                    await fetch("http://localhost:8080/api/chat/send", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                        body: JSON.stringify({ colisId, type: "AUDIO", fileUrl }),
-                    });
+                    await api.post("/chat/send", { colisId, type: "AUDIO", fileUrl });
                     fetchMessages();
                 } catch (err) {
                     console.error("Audio send error:", err);

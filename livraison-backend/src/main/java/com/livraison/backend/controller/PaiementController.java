@@ -2,7 +2,6 @@ package com.livraison.backend.controller;
 
 import com.livraison.backend.dto.PaiementDTO;
 import com.livraison.backend.dto.PaiementRequestDTO;
-import com.livraison.backend.entity.TypePaiement;
 import com.livraison.backend.service.PaiementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,33 +18,60 @@ public class PaiementController {
 
     private final PaiementService paiementService;
 
-
     @PostMapping("/{colisId}")
+
     @PreAuthorize("hasRole('USER')")
+
     public ResponseEntity<PaiementDTO> payer(
+
             @PathVariable UUID colisId,
-            @RequestParam TypePaiement type
+
+            @RequestBody PaiementRequestDTO request
     ) {
+
         return ResponseEntity.ok(
-                paiementService.payer(colisId, type)
+
+                paiementService.payer(
+                        colisId,
+                        request.getTypePaiement(),
+                        request.getClientPhone(),
+                        request.getPasscode()
+                )
         );
     }
 
+
     @GetMapping("/me")
+
     @PreAuthorize("hasRole('USER')")
+
     public ResponseEntity<List<PaiementDTO>> getMyPayments() {
-        return ResponseEntity.ok(paiementService.getMyPayments());
+
+        return ResponseEntity.ok(
+                paiementService.getMyPayments()
+        );
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/revenue")
-    public ResponseEntity<Double> getRevenue() {
-        return ResponseEntity.ok(paiementService.getAdminRevenue());
-    }
 
     @PreAuthorize("hasRole('ADMIN')")
+
+    public ResponseEntity<Double> getRevenue() {
+
+        return ResponseEntity.ok(
+                paiementService.getAdminRevenue()
+        );
+    }
+
+
     @GetMapping("/admin/transactions")
+
+    @PreAuthorize("hasRole('ADMIN')")
+
     public ResponseEntity<Long> getTransactions() {
-        return ResponseEntity.ok(paiementService.getTotalTransactions());
+
+        return ResponseEntity.ok(
+                paiementService.getTotalTransactions()
+        );
     }
 }

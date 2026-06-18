@@ -73,10 +73,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    // [DEBUG] — remove after diagnosis
+                    System.out.println("[JWT] Authenticated: " + email + " | authorities=" + userDetails.getAuthorities());
+
+                } else {
+                    // [DEBUG] — remove after diagnosis
+                    System.out.println("[JWT] Token INVALID for email: " + email);
                 }
             }
 
         } catch (Exception e) {
+            // [DEBUG] — remove after diagnosis
+            System.out.println("[JWT] Exception during auth: " + e.getClass().getSimpleName() + ": " + e.getMessage());
             SecurityContextHolder.clearContext();
         }
 

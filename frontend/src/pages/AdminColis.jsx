@@ -1,69 +1,71 @@
 import { useEffect, useState } from "react";
 import { Box, Clock, CheckCircle2, Search, Inbox, Trash2 } from "lucide-react";
 import api from "../api";
+import { useI18n } from "../i18n";
 
 /* ─────────────────────────────────────────────
    THEMES
 ───────────────────────────────────────────── */
 const THEMES = {
     dark: {
-        surface:    "#111128",
-        inputBg:    "#0a0a1a",
-        border:     "#1e1e30",
-        muted:      "#1c1c2e",
+        surface: "#111128",
+        inputBg: "#0a0a1a",
+        border: "#1e1e30",
+        muted: "#1c1c2e",
         mutedHover: "#22223a",
-        text:       "#e8e8f5",
-        textMid:    "#9494b8",
-        sub:        "#5a5a7a",
-        accent:     "#6366f1",
-        accentBg:   "#6366f118",
-        red:        "#f87171",
-        redBg:      "#f8717118",
-        green:      "#4ade80",
-        greenBg:    "#4ade8018",
-        yellow:     "#fbbf24",
-        yellowBg:   "#fbbf2418",
-        shadow:     "0 4px 24px rgba(0,0,0,0.45)",
-        shadowSm:   "0 1px 6px rgba(0,0,0,0.25)",
+        text: "#e8e8f5",
+        textMid: "#9494b8",
+        sub: "#5a5a7a",
+        accent: "#6366f1",
+        accentBg: "#6366f118",
+        red: "#f87171",
+        redBg: "#f8717118",
+        green: "#4ade80",
+        greenBg: "#4ade8018",
+        yellow: "#fbbf24",
+        yellowBg: "#fbbf2418",
+        shadow: "0 4px 24px rgba(0,0,0,0.45)",
+        shadowSm: "0 1px 6px rgba(0,0,0,0.25)",
     },
     light: {
-        surface:    "#ffffff",
-        inputBg:    "#f8f9fc",
-        border:     "#e5e7eb",
-        muted:      "#f3f4f6",
+        surface: "#ffffff",
+        inputBg: "#f8f9fc",
+        border: "#e5e7eb",
+        muted: "#f3f4f6",
         mutedHover: "#e9eaec",
-        text:       "#0f172a",
-        textMid:    "#374151",
-        sub:        "#6b7280",
-        accent:     "#6366f1",
-        accentBg:   "#ede9fe",
-        red:        "#ef4444",
-        redBg:      "#fee2e2",
-        green:      "#16a34a",
-        greenBg:    "#dcfce7",
-        yellow:     "#d97706",
-        yellowBg:   "#fef3c7",
-        shadow:     "0 4px 24px rgba(0,0,0,0.07)",
-        shadowSm:   "0 1px 4px rgba(0,0,0,0.05)",
+        text: "#0f172a",
+        textMid: "#374151",
+        sub: "#6b7280",
+        accent: "#6366f1",
+        accentBg: "#ede9fe",
+        red: "#ef4444",
+        redBg: "#fee2e2",
+        green: "#16a34a",
+        greenBg: "#dcfce7",
+        yellow: "#d97706",
+        yellowBg: "#fef3c7",
+        shadow: "0 4px 24px rgba(0,0,0,0.07)",
+        shadowSm: "0 1px 4px rgba(0,0,0,0.05)",
     },
 };
 
+
 const STATUS_BADGE = {
     dark: {
-        PUBLIE:   { background: "#1e3a5f55", color: "#60a5fa" },
-        ACCEPTE:  { background: "#2e1a4a55", color: "#c084fc" },
+        PUBLIE: { background: "#1e3a5f55", color: "#60a5fa" },
+        ACCEPTE: { background: "#2e1a4a55", color: "#c084fc" },
         EN_COURS: { background: "#3d2b0055", color: "#fbbf24" },
-        LIVRE:    { background: "#14281a55", color: "#4ade80" },
-        ANNULE:   { background: "#2d0f0f55", color: "#f87171" },
-        default:  { background: "#1c1c2e",   color: "#5a5a7a" },
+        LIVRE: { background: "#14281a55", color: "#4ade80" },
+        ANNULE: { background: "#2d0f0f55", color: "#f87171" },
+        default: { background: "#1c1c2e", color: "#5a5a7a" },
     },
     light: {
-        PUBLIE:   { background: "#dbeafe", color: "#1d4ed8" },
-        ACCEPTE:  { background: "#f3e8ff", color: "#7e22ce" },
+        PUBLIE: { background: "#dbeafe", color: "#1d4ed8" },
+        ACCEPTE: { background: "#f3e8ff", color: "#7e22ce" },
         EN_COURS: { background: "#fef3c7", color: "#b45309" },
-        LIVRE:    { background: "#dcfce7", color: "#15803d" },
-        ANNULE:   { background: "#fee2e2", color: "#b91c1c" },
-        default:  { background: "#f3f4f6", color: "#6b7280" },
+        LIVRE: { background: "#dcfce7", color: "#15803d" },
+        ANNULE: { background: "#fee2e2", color: "#b91c1c" },
+        default: { background: "#f3f4f6", color: "#6b7280" },
     },
 };
 
@@ -106,12 +108,12 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
     const [hovered, setHovered] = useState(false);
     return (
         <div
+            className="acolis-stat-card"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
                 background: theme.surface,
                 borderRadius: 16,
-                padding: "20px 22px",
                 boxShadow: hovered ? theme.shadow : theme.shadowSm,
                 border: `1px solid ${hovered ? iconColor + "50" : theme.border}`,
                 transition: "all 0.22s ease",
@@ -119,7 +121,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
                 cursor: "default",
             }}
         >
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
                 <p style={{ fontSize: 12, color: theme.sub, margin: 0, fontWeight: 500, letterSpacing: "0.02em" }}>
                     {label}
                 </p>
@@ -136,7 +138,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
                     <Icon size={17} color={iconColor} strokeWidth={2} />
                 </div>
             </div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: valueColor ?? theme.text, lineHeight: 1, letterSpacing: "-1px" }}>
+            <div className="acolis-stat-val" style={{ color: valueColor ?? theme.text }}>
                 {value}
             </div>
         </div>
@@ -148,6 +150,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
 ───────────────────────────────────────────── */
 export default function AdminColis() {
     const { theme, mode } = useTheme();
+    const { t } = useI18n();
 
     const [colis, setColis] = useState([]);
     const [filtered, setFiltered] = useState([]);
@@ -196,12 +199,13 @@ export default function AdminColis() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Confirmer la suppression ?")) return;
+        if (!window.confirm(t("admin.confirmDelete"))) return;
+
         try {
             await api.delete(`/colis/${id}`);
             fetchColis();
         } catch (err) {
-            alert("Erreur suppression ❌");
+            alert(t("admin.deleteError"));
         }
     };
 
@@ -212,9 +216,9 @@ export default function AdminColis() {
 
     const formatId = (id) => "#" + id.slice(0, 6).toUpperCase();
 
-    const total   = colis.length;
+    const total = colis.length;
     const enCours = colis.filter(c => c.statut === "EN_COURS").length;
-    const livres  = colis.filter(c => c.statut === "LIVRE").length;
+    const livres = colis.filter(c => c.statut === "LIVRE").length;
 
     const theadBg = mode === "dark" ? "#0a0a1a60" : "#f8f9fc";
 
@@ -231,6 +235,12 @@ export default function AdminColis() {
                 @keyframes colisPageIn {
                     from { opacity: 0; transform: translateY(8px); }
                     to   { opacity: 1; transform: translateY(0); }
+                }
+                .acolis-stat-card { padding: 20px 22px; }
+                .acolis-stat-val  { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+                @media (max-width: 639px) {
+                    .acolis-stat-card { padding: 12px 14px; }
+                    .acolis-stat-val  { font-size: 22px; }
                 }
             `}</style>
 
@@ -251,19 +261,19 @@ export default function AdminColis() {
                     </div>
                     <div>
                         <h1 style={{ fontSize: 20, fontWeight: 700, color: theme.text, margin: 0, letterSpacing: "-0.4px" }}>
-                            Gestion des colis
+                            {t("admin.colisManagement")}
                         </h1>
                         <p style={{ fontSize: 12, color: theme.sub, margin: 0, marginTop: 2 }}>
-                            {filtered.length} résultat{filtered.length !== 1 ? "s" : ""} · mise à jour en temps réel
+                            {filtered.length} {t(filtered.length !== 1 ? "admin.results" : "admin.result")} · {t("admin.realTimeUpdate")}
                         </p>
                     </div>
                 </div>
             </div>
 
             {/* ── STATS ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: 14 }}>
                 <StatCard
-                    label="Total colis"
+                    label={t("admin.allColis")}
                     value={total}
                     icon={Box}
                     iconColor={theme.accent}
@@ -271,7 +281,7 @@ export default function AdminColis() {
                     theme={theme}
                 />
                 <StatCard
-                    label="En cours"
+                    label={t("admin.inProgress")}
                     value={enCours}
                     icon={Clock}
                     iconColor={theme.yellow}
@@ -280,7 +290,7 @@ export default function AdminColis() {
                     theme={theme}
                 />
                 <StatCard
-                    label="Livrés"
+                    label={t("admin.delivered")}
                     value={livres}
                     icon={CheckCircle2}
                     iconColor={theme.green}
@@ -304,7 +314,7 @@ export default function AdminColis() {
                     }} />
                     <input
                         type="text"
-                        placeholder="Rechercher par nom, email, ville..."
+                        placeholder={t("admin.search")}
                         value={search}
                         onChange={(e) => handleSearch(e.target.value)}
                         onFocus={e => {
@@ -333,9 +343,9 @@ export default function AdminColis() {
                 {/* Filter pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {["TOUS", "PUBLIE", "ACCEPTE", "EN_COURS", "LIVRE", "ANNULE"].map((status) => {
-                        const active  = filter === status;
+                        const active = filter === status;
                         const hovered = filterHover === status;
-                        const badge   = STATUS_BADGE[mode]?.[status];
+                        const badge = STATUS_BADGE[mode]?.[status];
                         return (
                             <button
                                 key={status}
@@ -357,7 +367,15 @@ export default function AdminColis() {
                                     letterSpacing: "0.01em",
                                 }}
                             >
-                                {status === "TOUS" ? "Tous" : status.replace("_", " ")}
+                                {
+                                    status === "TOUS" ? t("admin.all") :
+                                        status === "PUBLIE" ? t("admin.statusPublished") :
+                                            status === "ACCEPTE" ? t("admin.statusAccepted") :
+                                                status === "EN_COURS" ? t("admin.statusInProgress") :
+                                                    status === "LIVRE" ? t("admin.statusDelivered") :
+                                                        status === "ANNULE" ? t("admin.statusCancelled") :
+                                                            status
+                                }
                             </button>
                         );
                     })}
@@ -385,7 +403,7 @@ export default function AdminColis() {
                     }}>
                         <Spinner color={theme.accent} />
                         <p style={{ fontSize: 13, color: theme.sub, margin: 0 }}>
-                            Chargement des colis...
+                            {t("admin.loadingColis")}
                         </p>
                     </div>
                 )}
@@ -414,10 +432,10 @@ export default function AdminColis() {
                         </div>
                         <div style={{ textAlign: "center" }}>
                             <p style={{ fontSize: 15, fontWeight: 600, color: theme.text, margin: "0 0 5px" }}>
-                                Aucun colis trouvé
+                                {t("admin.noColis")}
                             </p>
                             <p style={{ fontSize: 12, color: theme.sub, margin: 0 }}>
-                                Modifiez vos filtres ou votre recherche
+                                {t("admin.modifyFilters")}
                             </p>
                         </div>
                     </div>
@@ -425,12 +443,12 @@ export default function AdminColis() {
 
                 {/* Table */}
                 {!loading && filtered.length > 0 && (
-                    <div style={{ overflowX: "auto" }}>
+                    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
                         <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
 
                             <thead>
                                 <tr style={{ background: theadBg, borderBottom: `1px solid ${theme.border}` }}>
-                                    {["Commande", "Client", "Colis", "Route", "Prix", "Statut", "Paiement", ""].map(h => (
+                                    {[t("admin.order"), t("admin.client"), t("admin.package"), t("admin.route"), t("admin.price"), t("admin.status"), t("admin.payment"), ""].map(h => (
                                         <th key={h} style={{
                                             padding: "12px 16px",
                                             textAlign: "left",
@@ -547,7 +565,7 @@ export default function AdminColis() {
                                                     fontWeight: 600,
                                                     whiteSpace: "nowrap",
                                                 }}>
-                                                    ✔ Payé
+                                                    ✔ {t("admin.paid")}
                                                 </span>
                                             ) : (
                                                 <span style={{
@@ -562,7 +580,7 @@ export default function AdminColis() {
                                                     fontWeight: 600,
                                                     whiteSpace: "nowrap",
                                                 }}>
-                                                    ✕ Impayé
+                                                    ✕ {t("admin.unpaid")}
                                                 </span>
                                             )}
                                         </td>
@@ -590,7 +608,7 @@ export default function AdminColis() {
                                                 }}
                                             >
                                                 <Trash2 size={13} />
-                                                Supprimer
+                                                {t("admin.delete")}
                                             </button>
                                         </td>
                                     </tr>

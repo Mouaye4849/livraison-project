@@ -7,6 +7,7 @@ import com.livraison.backend.repository.ChatMessageRepository;
 import com.livraison.backend.repository.ColisRepository;
 import com.livraison.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
@@ -74,21 +76,23 @@ public class ChatController {
     public ResponseEntity<String> uploadFile(
             @RequestParam("file") MultipartFile file
     ) {
+        log.info("[UPLOAD] ► file={} size={} bytes contentType={}",
+                file.getOriginalFilename(), file.getSize(), file.getContentType());
 
         try {
             String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-
-            Path path = Paths.get("uploads/" + filename);
-
-            Files.createDirectories(path.getParent());
+            Path uploadDir = Paths.get("uploads");
+            Files.createDirectories(uploadDir);
+            Path path = uploadDir.resolve(filename);
             Files.write(path, file.getBytes());
 
             String fileUrl = "http://localhost:8080/uploads/" + filename;
-
+            log.info("[UPLOAD] ✓ saved → {} ({}B)", path.toAbsolutePath(), file.getSize());
             return ResponseEntity.ok(fileUrl);
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Upload failed");
+            log.error("[UPLOAD] ✗ {} : {}", e.getClass().getSimpleName(), e.getMessage(), e);
+            return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());
         }
     }
 }

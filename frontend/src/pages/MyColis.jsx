@@ -5,8 +5,9 @@ import {
     Package, Weight, Hash, DollarSign, CheckCircle, XCircle,
     Upload, Trash2, CreditCard, Rocket, Loader2, Search,
     RefreshCw, Plus, ChevronDown, Image, ChevronUp, AlertTriangle,
-    Filter, ArrowUpDown, X, SortAsc
+    Filter, ArrowUpDown, X, SortAsc, Navigation,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 /* ─────────────────────────────────────────────
    DESIGN TOKENS  (inline so no external files)
@@ -91,12 +92,12 @@ const CSS = `
    STATUS CONFIG
 ───────────────────────────────────────────── */
 const STATUS_CONFIG = {
-    BROUILLON: { label: "Brouillon", color: "#9ca3af", bg: "rgba(156,163,175,.12)", bar: "#374151" },
-    PUBLIE: { label: "Publié", color: "#60a5fa", bg: "rgba(96,165,250,.12)", bar: "#1d4ed8" },
-    ACCEPTE: { label: "Accepté", color: "#fbbf24", bg: "rgba(251,191,36,.12)", bar: "#d97706" },
-    EN_COURS: { label: "En cours", color: "#c084fc", bg: "rgba(192,132,252,.12)", bar: "#7c3aed" },
-    LIVRE: { label: "Livré", color: "#34d399", bg: "rgba(52,211,153,.12)", bar: "#059669" },
-    ANNULE: { label: "Annulé", color: "#f87171", bg: "rgba(248,113,113,.12)", bar: "#dc2626" },
+    BROUILLON: { labelKey: "statusBrouillon", color: "#9ca3af", bg: "rgba(156,163,175,.12)", bar: "#374151" },
+    PUBLIE: { labelKey: "statusPublie", color: "#60a5fa", bg: "rgba(96,165,250,.12)", bar: "#1d4ed8" },
+    ACCEPTE: { labelKey: "statusAccepte", color: "#fbbf24", bg: "rgba(251,191,36,.12)", bar: "#d97706" },
+    EN_COURS: { labelKey: "statusEnCours", color: "#c084fc", bg: "rgba(192,132,252,.12)", bar: "#7c3aed" },
+    LIVRE: { labelKey: "statusLivre", color: "#34d399", bg: "rgba(52,211,153,.12)", bar: "#059669" },
+    ANNULE: { labelKey: "statusAnnule", color: "#f87171", bg: "rgba(248,113,113,.12)", bar: "#dc2626" },
 };
 
 const ALL_STATUSES = ["BROUILLON", "PUBLIE", "ACCEPTE", "EN_COURS", "LIVRE", "ANNULE"];
@@ -106,6 +107,7 @@ const ALL_STATUSES = ["BROUILLON", "PUBLIE", "ACCEPTE", "EN_COURS", "LIVRE", "AN
 ───────────────────────────────────────────── */
 export default function MyColis() {
     const navigate = useNavigate();
+    const { t } = useI18n();
 
     const [colis, setColis] = useState([]);
     const [photos, setPhotos] = useState({});
@@ -149,7 +151,7 @@ export default function MyColis() {
             setColis(res.data);
             res.data.forEach(c => fetchPhotos(c.id));
         } catch {
-            showToast("error", "Erreur chargement colis");
+            showToast("error", t("myColis.toastLoadError"));
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -165,22 +167,22 @@ export default function MyColis() {
         try {
             await api.post(`/photos/${colisId}`, formData);
             fetchPhotos(colisId);
-            showToast("success", "Photo ajoutée ✓");
+            showToast("success", t("myColis.toastPhotoAdded"));
         } catch {
-            showToast("error", "Upload échoué");
+            showToast("error", t("myColis.toastPhotoFailed"));
         }
     };
 
     const handleDeletePhoto = (photoId, colisId) => {
         setConfirm({
-            message: "Supprimer cette photo ?",
+            message: t("myColis.confirmDeletePhoto"),
             onConfirm: async () => {
                 try {
                     await api.delete(`/photos/${photoId}`);
                     fetchPhotos(colisId);
-                    showToast("success", "Photo supprimée");
+                    showToast("success", t("myColis.toastPhotoDeleted"));
                 } catch {
-                    showToast("error", "Suppression échouée");
+                    showToast("error", t("myColis.toastDeleteFailed"));
                 }
             }
         });
@@ -190,20 +192,20 @@ export default function MyColis() {
         try {
             await api.put(`/colis/${id}/publish`);
             fetchColis(true);
-            showToast("success", "Colis publié 🚀");
+            showToast("success", t("myColis.toastPublished"));
         } catch {
-            showToast("error", "Erreur lors de la publication");
+            showToast("error", t("myColis.toastPublishError"));
         }
     };
 
     const handleCancel = (id) => {
         setConfirm({
-            message: "Annuler ce colis ? Cette action est irréversible.",
+            message: t("myColis.confirmCancelColis"),
             onConfirm: async () => {
                 try {
                     await api.put(`/colis/${id}/cancel`);
                     fetchColis(true);
-                    showToast("success", "Colis annulé");
+                    showToast("success", t("myColis.toastCancelled"));
                 } catch (err) {
                     showToast("error", err.response?.data?.message || "Erreur");
                 }
@@ -279,7 +281,7 @@ export default function MyColis() {
                             }}>
                                 <AlertTriangle size={18} color="#f97316" />
                             </div>
-                            <span style={{ fontWeight: 600, fontSize: 16 }}>Confirmation</span>
+                            <span style={{ fontWeight: 600, fontSize: 16 }}>{t("myColis.confirmTitle")}</span>
                         </div>
                         <p style={{ color: "#aaa", fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
                             {confirm.message}
@@ -290,7 +292,7 @@ export default function MyColis() {
                                 background: "transparent", color: "#888", cursor: "pointer", fontSize: 13,
                                 fontFamily: "'DM Sans', sans-serif", fontWeight: 500
                             }}>
-                                Annuler
+                                {t("myColis.confirmCancel")}
                             </button>
                             <button onClick={() => { confirm.onConfirm(); setConfirm(null); }} style={{
                                 padding: "8px 18px", borderRadius: 8, border: "none",
@@ -298,7 +300,7 @@ export default function MyColis() {
                                 color: "#fff", cursor: "pointer", fontSize: 13,
                                 fontFamily: "'DM Sans', sans-serif", fontWeight: 600
                             }}>
-                                Confirmer
+                                {t("myColis.confirmOk")}
                             </button>
                         </div>
                     </div>
@@ -323,13 +325,13 @@ export default function MyColis() {
                                 <Package size={20} color="#fff" />
                             </div>
                             <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-.3px" }}>
-                                Mes Colis
+                                {t("myColis.title")}
                             </h1>
                         </div>
                         <p style={{ color: "#666", fontSize: 14, marginLeft: 52 }}>
-                            {loading ? "Chargement…" : `${colis.length} colis au total`}
+                            {loading ? t("common.loading") : `${colis.length} ${t("myColis.total")}`}
                             {!loading && displayed.length !== colis.length &&
-                                <span style={{ color: "#f97316", marginLeft: 6 }}>· {displayed.length} affichés</span>
+                                <span style={{ color: "#f97316", marginLeft: 6 }}>· {displayed.length} {t("myColis.displayed")}</span>
                             }
                         </p>
                     </div>
@@ -350,7 +352,7 @@ export default function MyColis() {
                                 transform: refreshing ? "rotate(360deg)" : "none",
                                 transition: refreshing ? "transform .8s linear infinite" : "none"
                             }} />
-                            Actualiser
+                            {t("myColis.refresh")}
                         </button>
                         <button
                             onClick={() => navigate("/dashboard/colis/create")}
@@ -366,7 +368,7 @@ export default function MyColis() {
                             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(30,58,138,.5)"; }}
                             onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(30,58,138,.35)"; }}
                         >
-                            <Plus size={15} /> Créer un colis
+                            <Plus size={15} /> {t("myColis.create")}
                         </button>
                     </div>
                 </div>
@@ -388,7 +390,7 @@ export default function MyColis() {
                                 fontFamily: "'DM Sans', sans-serif", transition: "all .15s"
                             }}
                         >
-                            Tous <span style={{ opacity: .6 }}>({colis.length})</span>
+                            {t("myColis.filterAll")} <span style={{ opacity: .6 }}>({colis.length})</span>
                         </button>
                         {ALL_STATUSES.filter(s => counts[s]).map(s => {
                             const cfg = STATUS_CONFIG[s];
@@ -405,7 +407,7 @@ export default function MyColis() {
                                         fontFamily: "'DM Sans', sans-serif", transition: "all .15s"
                                     }}
                                 >
-                                    {cfg.label} <span style={{ opacity: .6 }}>({counts[s]})</span>
+                                    {t(`myColis.${cfg.labelKey}`)} <span style={{ opacity: .6 }}>({counts[s]})</span>
                                 </button>
                             );
                         })}
@@ -423,7 +425,7 @@ export default function MyColis() {
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                placeholder="Rechercher un colis…"
+                                placeholder={t("myColis.searchPlaceholder")}
                                 style={{
                                     width: "100%", padding: "9px 12px 9px 36px",
                                     background: "#111", border: "1px solid #1f1f1f",
@@ -454,9 +456,9 @@ export default function MyColis() {
                                 fontFamily: "'DM Sans', sans-serif"
                             }}
                         >
-                            <option value="none">Trier par…</option>
-                            <option value="prix_asc">Prix ↑</option>
-                            <option value="prix_desc">Prix ↓</option>
+                            <option value="none">{t("myColis.sortBy")}</option>
+                            <option value="prix_asc">{t("myColis.sortPriceAsc")}</option>
+                            <option value="prix_desc">{t("myColis.sortPriceDesc")}</option>
                         </select>
                     </div>
                 )}
@@ -499,12 +501,12 @@ export default function MyColis() {
                             <Package size={32} color="#3b5fc0" />
                         </div>
                         <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
-                            {search || filterStatus !== "ALL" ? "Aucun résultat" : "Aucun colis"}
+                            {search || filterStatus !== "ALL" ? t("myColis.emptyNoResult") : t("myColis.emptyTitle")}
                         </h3>
                         <p style={{ color: "#555", fontSize: 14, marginBottom: 24 }}>
                             {search || filterStatus !== "ALL"
-                                ? "Modifiez vos filtres pour voir plus de résultats."
-                                : "Vous n'avez pas encore créé de colis."}
+                                ? t("myColis.emptyFilterDesc")
+                                : t("myColis.emptyDesc")}
                         </p>
                         {!search && filterStatus === "ALL" && (
                             <button
@@ -517,7 +519,7 @@ export default function MyColis() {
                                     display: "inline-flex", alignItems: "center", gap: 8
                                 }}
                             >
-                                <Plus size={15} /> Créer mon premier colis
+                                <Plus size={15} /> {t("myColis.createFirst")}
                             </button>
                         )}
                     </div>
@@ -581,16 +583,16 @@ export default function MyColis() {
                                                 fontWeight: 600, background: cfg.bg, color: cfg.color,
                                                 border: `1px solid ${cfg.color}30`, whiteSpace: "nowrap"
                                             }}>
-                                                {cfg.label || c.statut}
+                                                {cfg.labelKey ? t(`myColis.${cfg.labelKey}`) : c.statut}
                                             </span>
                                         </div>
 
                                         {/* Info rows */}
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
                                             {[
-                                                { icon: <Weight size={13} />, label: "Poids", value: `${c.poidsKg} kg` },
-                                                { icon: <Hash size={13} />, label: "Quantité", value: c.quantite ?? "—" },
-                                                { icon: <DollarSign size={13} />, label: "Prix proposé", value: c.prixProposeMRU ? `${c.prixProposeMRU} MRU` : "—" },
+                                                { icon: <Weight size={13} />, label: t("myColis.infoWeight"), value: `${c.poidsKg} kg` },
+                                                { icon: <Hash size={13} />, label: t("myColis.infoQty"), value: c.quantite ?? "—" },
+                                                { icon: <DollarSign size={13} />, label: t("myColis.infoPrice"), value: c.prixProposeMRU ? `${c.prixProposeMRU} MRU` : "—" },
                                             ].map(({ icon, label, value }) => (
                                                 <div key={label} style={{
                                                     display: "flex", justifyContent: "space-between",
@@ -617,7 +619,7 @@ export default function MyColis() {
                                             }}>
                                                 <CheckCircle size={14} color="#34d399" />
                                                 <span style={{ fontSize: 12, fontWeight: 600, color: "#34d399" }}>
-                                                    Paiement confirmé
+                                                    {t("myColis.paid")}
                                                 </span>
                                             </div>
                                         )}
@@ -628,7 +630,7 @@ export default function MyColis() {
                                                 <ActionBtn
                                                     variant="primary"
                                                     icon={<Rocket size={13} />}
-                                                    label="Publier"
+                                                    label={t("myColis.actionPublish")}
                                                     onClick={() => handlePublish(c.id)}
                                                 />
                                             )}
@@ -636,7 +638,7 @@ export default function MyColis() {
                                                 <ActionBtn
                                                     variant="success"
                                                     icon={<CreditCard size={13} />}
-                                                    label="Payer"
+                                                    label={t("myColis.actionPay")}
                                                     onClick={() => navigate(`/dashboard/pay/${c.id}`)}
                                                 />
                                             )}
@@ -644,8 +646,16 @@ export default function MyColis() {
                                                 <ActionBtn
                                                     variant="danger"
                                                     icon={<XCircle size={13} />}
-                                                    label="Annuler"
+                                                    label={t("myColis.actionCancel")}
                                                     onClick={() => handleCancel(c.id)}
+                                                />
+                                            )}
+                                            {["ACCEPTE", "EN_COURS", "LIVRE"].includes(c.statut) && (
+                                                <ActionBtn
+                                                    variant="track"
+                                                    icon={<Navigation size={13} />}
+                                                    label={t("myColis.actionTrack")}
+                                                    onClick={() => navigate(`/dashboard/tracking/${c.id}`)}
                                                 />
                                             )}
                                         </div>
@@ -664,7 +674,7 @@ export default function MyColis() {
                                                 }}
                                             >
                                                 <Image size={13} />
-                                                Photos {colisPhotos.length > 0 && (
+                                                {t("myColis.photos")} {colisPhotos.length > 0 && (
                                                     <span style={{
                                                         padding: "1px 7px", borderRadius: 999,
                                                         background: "rgba(59,95,192,.2)", color: "#60a5fa",
@@ -719,7 +729,7 @@ export default function MyColis() {
                                                         onMouseLeave={e => { e.currentTarget.style.borderColor = "#2a2a2a"; e.currentTarget.style.color = "#555"; }}
                                                     >
                                                         <Upload size={13} />
-                                                        Ajouter une photo
+                                                        {t("myColis.addPhoto")}
                                                         <input
                                                             type="file"
                                                             accept="image/*"
@@ -746,9 +756,10 @@ export default function MyColis() {
    ACTION BUTTON  (inline sub-component)
 ───────────────────────────────────────────── */
 const ACTION_STYLES = {
-    primary: { bg: "rgba(59,95,192,.15)", color: "#60a5fa", hoverBg: "rgba(59,95,192,.3)" },
-    success: { bg: "rgba(52,211,153,.1)", color: "#34d399", hoverBg: "rgba(52,211,153,.25)" },
-    danger: { bg: "rgba(248,113,113,.1)", color: "#f87171", hoverBg: "rgba(248,113,113,.25)" },
+    primary: { bg: "rgba(59,95,192,.15)",   color: "#60a5fa", hoverBg: "rgba(59,95,192,.3)" },
+    success: { bg: "rgba(52,211,153,.1)",   color: "#34d399", hoverBg: "rgba(52,211,153,.25)" },
+    danger:  { bg: "rgba(248,113,113,.1)",  color: "#f87171", hoverBg: "rgba(248,113,113,.25)" },
+    track:   { bg: "rgba(168,85,247,.12)",  color: "#c084fc", hoverBg: "rgba(168,85,247,.28)" },
 };
 
 function ActionBtn({ variant = "primary", icon, label, onClick }) {

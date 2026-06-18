@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import api from "../api";
 import { Bell, Loader2 } from "lucide-react";
+import { useI18n } from "../i18n";
 
 export default function AdminNavbar() {
+    const { t } = useI18n();
 
     const [notifications, setNotifications] = useState([]);
     const [unread, setUnread] = useState(0);
@@ -57,7 +59,7 @@ export default function AdminNavbar() {
 
             {/* LEFT */}
             <h1 className="text-lg font-bold">
-                Admin Dashboard
+                {t("admin.dashboard")}
             </h1>
 
             {/* RIGHT */}
@@ -87,7 +89,7 @@ export default function AdminNavbar() {
                         rounded-xl shadow-xl p-4 z-50">
 
                         <h3 className="font-semibold mb-3 text-sm text-gray-200">
-                            🔔 Notifications
+                            🔔 {t("notifications.title")}
                         </h3>
 
                         {/* ⏳ LOADING */}
@@ -98,7 +100,7 @@ export default function AdminNavbar() {
                         ) : notifications.length === 0 ? (
 
                             <p className="text-gray-400 text-sm text-center py-4">
-                                Aucune notification
+                                {t("notifications.empty")}
                             </p>
 
                         ) : (

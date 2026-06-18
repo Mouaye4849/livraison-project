@@ -29,6 +29,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Wasali utilise votre position pour partager votre localisation avec le destinataire pendant la livraison.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Permettre à Wasali d'accéder à vos photos pour partager des images.",

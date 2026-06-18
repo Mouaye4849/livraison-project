@@ -14,8 +14,10 @@ import {
     Inbox,
     ShieldOff,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 export default function PublicColis() {
+    const { t } = useI18n();
 
     const [colis, setColis] = useState([]);
     const [trajets, setTrajets] = useState([]);
@@ -44,7 +46,7 @@ export default function PublicColis() {
             setTrajets(trajetsRes.data);
         } catch (err) {
             console.error(err);
-            setMessage("Erreur chargement ❌");
+            setMessage(t("publicColis.loadError"));
         } finally {
             setLoading(false);
         }
@@ -54,18 +56,18 @@ export default function PublicColis() {
     const handleAccept = async (colisId) => {
         const trajetId = selectedTrajet[colisId];
         if (!trajetId) {
-            return setMessage("Veuillez sélectionner un trajet ❌");
+            return setMessage(t("publicColis.selectTrajetError"));
         }
 
         try {
             setProcessing(prev => ({ ...prev, [colisId]: true }));
             setMessage(null);
             await api.put(`/colis/${colisId}/assign/${trajetId}`);
-            setMessage("Colis accepté avec succès ✅");
+            setMessage(t("publicColis.acceptSuccess"));
             setTimeout(() => navigate("/dashboard/trajets/with-colis"), 1200);
         } catch (err) {
             console.error(err);
-            setMessage(err.response?.data?.message || "Erreur ❌");
+            setMessage(err.response?.data?.message || t("publicColis.genericError"));
         } finally {
             setProcessing(prev => ({ ...prev, [colisId]: false }));
         }
@@ -80,8 +82,8 @@ export default function PublicColis() {
                         <ShieldOff size={22} className="text-red-400" />
                     </div>
                     <div>
-                        <p className="dark:text-white text-gray-900 font-semibold text-base">Accès refusé</p>
-                        <p className="text-gray-500 text-sm mt-1">Cette page est réservée aux voyageurs</p>
+                        <p className="dark:text-white text-gray-900 font-semibold text-base">{t("publicColis.accessDenied")}</p>
+                        <p className="text-gray-500 text-sm mt-1">{t("publicColis.accessDeniedDesc")}</p>
                     </div>
                 </div>
             </div>
@@ -93,7 +95,7 @@ export default function PublicColis() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 size={28} className="animate-spin text-[#1e3a8a]" />
-                <p className="text-gray-500 text-sm">Chargement des colis...</p>
+                <p className="text-gray-500 text-sm">{t("publicColis.loading")}</p>
             </div>
         );
     }
@@ -140,10 +142,10 @@ export default function PublicColis() {
                 </div>
                 <div>
                     <h2 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">
-                        Colis publics
+                        {t("publicColis.title")}
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        Découvrez les colis disponibles et assignez-les à vos trajets
+                        {t("publicColis.subtitle")}
                     </p>
                 </div>
             </div>
@@ -152,7 +154,7 @@ export default function PublicColis() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-[#1e3a8a] transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Total colis</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("publicColis.statTotal")}</p>
                         <div className="w-8 h-8 rounded-lg bg-[#1e3a8a]/20 flex items-center justify-center">
                             <Package size={14} className="text-blue-400" />
                         </div>
@@ -162,7 +164,7 @@ export default function PublicColis() {
 
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-green-500/30 transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Disponibles</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("publicColis.statAvailable")}</p>
                         <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
                             <CheckCircle size={14} className="text-green-400" />
                         </div>
@@ -172,7 +174,7 @@ export default function PublicColis() {
 
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-[#f97316]/30 transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Trajets</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("publicColis.statTrajets")}</p>
                         <div className="w-8 h-8 rounded-lg bg-[#f97316]/10 flex items-center justify-center">
                             <Truck size={14} className="text-[#f97316]" />
                         </div>
@@ -182,7 +184,7 @@ export default function PublicColis() {
 
                 <div className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-[#1e3a8a] transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Sélectionnés</p>
+                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">{t("publicColis.statSelected")}</p>
                         <div className="w-8 h-8 rounded-lg bg-[#1e3a8a]/20 flex items-center justify-center">
                             <MapPin size={14} className="text-blue-400" />
                         </div>
@@ -215,8 +217,8 @@ export default function PublicColis() {
                         <Inbox size={28} className="text-gray-400" />
                     </div>
                     <div className="text-center">
-                        <p className="dark:text-white text-gray-900 font-semibold text-base">Aucun colis disponible</p>
-                        <p className="text-gray-500 text-sm mt-1">Les colis publics apparaîtront ici</p>
+                        <p className="dark:text-white text-gray-900 font-semibold text-base">{t("publicColis.emptyTitle")}</p>
+                        <p className="text-gray-500 text-sm mt-1">{t("publicColis.emptyDesc")}</p>
                     </div>
                 </div>
             )}
@@ -233,7 +235,6 @@ export default function PublicColis() {
                             key={c.id}
                             className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-5 shadow-lg hover:border-[#1e3a8a] hover:-translate-y-0.5 transition-all duration-200 flex flex-col gap-4"
                         >
-                            {/* NAME */}
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-[#1e3a8a]/20 flex items-center justify-center shrink-0">
                                     <Package size={15} className="text-blue-400" />
@@ -262,7 +263,7 @@ export default function PublicColis() {
 
                                 <div className="flex items-center gap-2">
                                     <Hash size={13} className="text-gray-400 shrink-0" />
-                                    <span className="text-gray-500 text-sm">Qté : {c.quantite ?? "—"}</span>
+                                    <span className="text-gray-500 text-sm">{t("publicColis.qty")} {c.quantite ?? "—"}</span>
                                 </div>
 
                                 <div className="flex items-center gap-2">
@@ -280,7 +281,7 @@ export default function PublicColis() {
                             <div className="space-y-1.5">
                                 <div className="flex items-center gap-2">
                                     <Truck size={12} className="text-gray-400" />
-                                    <span className="text-gray-500 text-xs">Choisir un trajet</span>
+                                    <span className="text-gray-500 text-xs">{t("publicColis.chooseTrajet")}</span>
                                 </div>
                                 <select
                                     value={selectedTrajet[c.id] || ""}
@@ -292,10 +293,10 @@ export default function PublicColis() {
                                         })
                                     }
                                 >
-                                    <option value="">Sélectionner un trajet...</option>
-                                    {trajets.map((t) => (
-                                        <option key={t.id} value={t.id}>
-                                            {t.origine} → {t.destination}
+                                    <option value="">{t("publicColis.selectTrajetPlaceholder")}</option>
+                                    {trajets.map((trj) => (
+                                        <option key={trj.id} value={trj.id}>
+                                            {trj.origine} → {trj.destination}
                                         </option>
                                     ))}
                                 </select>
@@ -316,7 +317,7 @@ export default function PublicColis() {
                                 ) : (
                                     <CheckCircle size={16} />
                                 )}
-                                {isProcessing ? "Traitement..." : "Accepter"}
+                                {isProcessing ? t("publicColis.processing") : t("publicColis.accept")}
                             </button>
 
                         </div>

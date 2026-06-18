@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "../api";
 import {
     MessageCircle,
     Package,
@@ -8,6 +9,7 @@ import {
     ChevronRight,
     MapPin,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 24 },
@@ -25,30 +27,24 @@ const stagger = {
 
 export default function MessagesPage() {
     const navigate = useNavigate();
+    const { t } = useI18n();
     const [colis, setColis] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchChats = async () => {
-            const token = localStorage.getItem("token");
             const user = JSON.parse(localStorage.getItem("user"));
 
             let chats = [];
 
             if (user.role === "ROLE_USER") {
-                const res = await fetch("http://localhost:8080/api/colis/me", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                chats = data.filter(c => c.statut === "ACCEPTE");
+                const res = await api.get("/colis/me");
+                chats = res.data.filter(c => ["ACCEPTE", "EN_COURS", "LIVRE"].includes(c.statut));
             }
 
             if (user.role === "ROLE_VOYAGEUR") {
-                const res = await fetch("http://localhost:8080/api/trajets/me", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const trajets = await res.json();
-                chats = trajets.flatMap(t => t.colis || []);
+                const res = await api.get("/trajets/me");
+                chats = res.data.flatMap(t => t.colis || []);
             }
 
             setColis(chats);
@@ -74,7 +70,7 @@ export default function MessagesPage() {
                 </div>
                 <div>
                     <div className="flex items-center gap-2">
-                        <h1 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">Messages</h1>
+                        <h1 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">{t("messages.title")}</h1>
                         {!loading && colis.length > 0 && (
                             <span className="bg-red-600/20 border border-red-600/30 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
                                 {colis.length}
@@ -83,7 +79,7 @@ export default function MessagesPage() {
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                        <span className="text-xs text-gray-500">Conversations actives</span>
+                        <span className="text-xs text-gray-500">{t("messages.activeConvs")}</span>
                     </div>
                 </div>
             </motion.div>
@@ -96,7 +92,7 @@ export default function MessagesPage() {
                 custom={1}
                 className="text-gray-500 text-sm leading-relaxed"
             >
-                Discutez facilement avec vos clients et voyageurs en temps réel.
+                {t("messages.intro")}
             </motion.p>
 
             {/* LOADING SKELETONS */}
@@ -135,10 +131,10 @@ export default function MessagesPage() {
                     </motion.div>
                     <div>
                         <p className="dark:text-white/60 text-gray-600 font-semibold text-base">
-                            Aucune conversation disponible
+                            {t("messages.emptyTitle")}
                         </p>
                         <p className="text-gray-400 text-sm mt-1 max-w-xs mx-auto leading-relaxed">
-                            Vos conversations avec voyageurs et clients apparaîtront ici
+                            {t("messages.emptyDesc")}
                         </p>
                     </div>
                 </motion.div>
@@ -187,7 +183,7 @@ export default function MessagesPage() {
                                 {/* Badge + Chevron */}
                                 <div className="flex items-center gap-2 shrink-0">
                                     <span className="hidden sm:inline-flex text-[10px] font-bold uppercase tracking-wider text-green-400 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">
-                                        Actif
+                                        {t("messages.activeBadge")}
                                     </span>
                                     <div className="w-7 h-7 rounded-lg dark:bg-white/5 bg-gray-100 dark:border-white/8 border-gray-200 border flex items-center justify-center group-hover:bg-red-600/15 group-hover:border-red-600/25 transition-all duration-200">
                                         <ChevronRight size={14} className="text-gray-400 group-hover:text-red-400 transition-colors duration-200" />

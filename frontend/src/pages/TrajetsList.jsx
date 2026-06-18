@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
     MapPin, Calendar, Weight, Pencil, Trash2, Truck, Inbox, ArrowRight, Loader2,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 function SpinIcon({ color }) {
     return (
@@ -21,6 +22,7 @@ function SpinIcon({ color }) {
 }
 
 export default function TrajetsList() {
+    const { t } = useI18n();
     const [trajets, setTrajets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -33,7 +35,7 @@ export default function TrajetsList() {
                 const response = await api.get("/trajets/me");
                 setTrajets(response.data);
             } catch (err) {
-                setError("Erreur lors du chargement ❌");
+                setError(t("trajetsList.loadError"));
             } finally {
                 setLoading(false);
             }
@@ -51,7 +53,7 @@ export default function TrajetsList() {
             await api.delete(`/trajets/${trajetId}`);
             setTrajets(trajets.filter((t) => t.id !== trajetId));
         } catch (err) {
-            setError("Erreur suppression ❌");
+            setError(t("trajetsList.deleteError"));
         } finally {
             setDeleting((prev) => ({ ...prev, [trajetId]: false }));
         }
@@ -70,7 +72,7 @@ export default function TrajetsList() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 size={28} className="animate-spin text-[#1e3a8a]" />
-                <p className="text-gray-500 text-sm">Chargement de vos trajets...</p>
+                <p className="text-gray-500 text-sm">{t("trajetsList.loading")}</p>
             </div>
         );
     }
@@ -95,10 +97,10 @@ export default function TrajetsList() {
                 </div>
                 <div>
                     <h2 className="dark:text-white text-gray-900 font-bold text-xl tracking-tight">
-                        Mes trajets
+                        {t("trajetsList.title")}
                     </h2>
                     <p className="text-gray-500 text-sm mt-0.5">
-                        {trajets.length} trajet{trajets.length !== 1 ? "s" : ""} enregistré{trajets.length !== 1 ? "s" : ""}
+                        {trajets.length} {trajets.length !== 1 ? t("trajetsList.countPlural") : t("trajetsList.countSingular")}
                     </p>
                 </div>
             </div>
@@ -111,10 +113,10 @@ export default function TrajetsList() {
                     </div>
                     <div className="text-center">
                         <p className="dark:text-white text-gray-900 font-semibold text-base">
-                            Aucun trajet trouvé
+                            {t("trajetsList.emptyTitle")}
                         </p>
                         <p className="text-gray-500 text-sm mt-1">
-                            Créez votre premier trajet pour commencer
+                            {t("trajetsList.emptyDesc")}
                         </p>
                     </div>
                 </div>
@@ -159,7 +161,7 @@ export default function TrajetsList() {
                                 <div className="flex items-center gap-2">
                                     <Weight size={13} className="text-gray-400" />
                                     <span className="text-gray-500 text-xs">
-                                        Capacité :&nbsp;
+                                        {t("trajetsList.capacity")}&nbsp;
                                         <strong className="dark:text-white text-gray-900 font-semibold">
                                             {trajet.capaciteKg} kg
                                         </strong>
@@ -181,7 +183,7 @@ export default function TrajetsList() {
                                     className="flex-1 flex items-center justify-center gap-2 bg-[#1e3a8a] hover:bg-[#1d4ed8] text-white text-sm font-semibold py-2 rounded-xl transition-all duration-200"
                                 >
                                     <Pencil size={14} />
-                                    Modifier
+                                    {t("trajetsList.edit")}
                                 </button>
                                 <button
                                     onClick={() => handleDelete(trajet.id)}
@@ -192,7 +194,7 @@ export default function TrajetsList() {
                                         ? <SpinIcon color="#f87171" />
                                         : <Trash2 size={14} />
                                     }
-                                    Supprimer
+                                    {t("trajetsList.delete")}
                                 </button>
                             </div>
                         </div>

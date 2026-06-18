@@ -1,75 +1,74 @@
 import { useEffect, useState } from "react";
 import { Truck, MapPin, Package, Search, Inbox, Trash2, CheckCircle, ArrowRight } from "lucide-react";
 import api from "../api";
+import { useI18n } from "../i18n";
 
 /* ─────────────────────────────────────────────
    THEMES
 ───────────────────────────────────────────── */
 const THEMES = {
     dark: {
-        surface:   "#111128",
-        inputBg:   "#0a0a1a",
-        border:    "#1e1e30",
-        muted:     "#1c1c2e",
-        text:      "#e8e8f5",
-        textMid:   "#9494b8",
-        sub:       "#5a5a7a",
-        accent:    "#6366f1",
-        accentBg:  "#6366f118",
-        red:       "#f87171",
-        redBg:     "#f8717118",
-        green:     "#4ade80",
-        greenBg:   "#4ade8018",
-        yellow:    "#fbbf24",
-        yellowBg:  "#fbbf2418",
-        orange:    "#fb923c",
-        orangeBg:  "#fb923c18",
-        purple:    "#c084fc",
-        purpleBg:  "#c084fc18",
-        blue:      "#60a5fa",
-        blueBg:    "#60a5fa18",
-        shadow:    "0 4px 24px rgba(0,0,0,0.45)",
-        shadowSm:  "0 1px 6px rgba(0,0,0,0.25)",
+        surface: "#111128",
+        inputBg: "#0a0a1a",
+        border: "#1e1e30",
+        muted: "#1c1c2e",
+        text: "#e8e8f5",
+        textMid: "#9494b8",
+        sub: "#5a5a7a",
+        accent: "#6366f1",
+        accentBg: "#6366f118",
+        red: "#f87171",
+        redBg: "#f8717118",
+        green: "#4ade80",
+        greenBg: "#4ade8018",
+        yellow: "#fbbf24",
+        yellowBg: "#fbbf2418",
+        orange: "#fb923c",
+        orangeBg: "#fb923c18",
+        purple: "#c084fc",
+        purpleBg: "#c084fc18",
+        blue: "#60a5fa",
+        blueBg: "#60a5fa18",
+        shadow: "0 4px 24px rgba(0,0,0,0.45)",
+        shadowSm: "0 1px 6px rgba(0,0,0,0.25)",
     },
     light: {
-        surface:   "#ffffff",
-        inputBg:   "#f8f9fc",
-        border:    "#e5e7eb",
-        muted:     "#f3f4f6",
-        text:      "#0f172a",
-        textMid:   "#374151",
-        sub:       "#6b7280",
-        accent:    "#6366f1",
-        accentBg:  "#ede9fe",
-        red:       "#ef4444",
-        redBg:     "#fee2e2",
-        green:     "#16a34a",
-        greenBg:   "#dcfce7",
-        yellow:    "#d97706",
-        yellowBg:  "#fef3c7",
-        orange:    "#ea580c",
-        orangeBg:  "#ffedd5",
-        purple:    "#7e22ce",
-        purpleBg:  "#f3e8ff",
-        blue:      "#1d4ed8",
-        blueBg:    "#dbeafe",
-        shadow:    "0 4px 24px rgba(0,0,0,0.07)",
-        shadowSm:  "0 1px 4px rgba(0,0,0,0.05)",
+        surface: "#ffffff",
+        inputBg: "#f8f9fc",
+        border: "#e5e7eb",
+        muted: "#f3f4f6",
+        text: "#0f172a",
+        textMid: "#374151",
+        sub: "#6b7280",
+        accent: "#6366f1",
+        accentBg: "#ede9fe",
+        red: "#ef4444",
+        redBg: "#fee2e2",
+        green: "#16a34a",
+        greenBg: "#dcfce7",
+        yellow: "#d97706",
+        yellowBg: "#fef3c7",
+        orange: "#ea580c",
+        orangeBg: "#ffedd5",
+        purple: "#7e22ce",
+        purpleBg: "#f3e8ff",
+        blue: "#1d4ed8",
+        blueBg: "#dbeafe",
+        shadow: "0 4px 24px rgba(0,0,0,0.07)",
+        shadowSm: "0 1px 4px rgba(0,0,0,0.05)",
     },
 };
 
 const STATUS_BADGE = {
     dark: {
-        OUVERT:  { background: "#4ade8018", color: "#4ade80" },
+        OUVERT: { background: "#4ade8018", color: "#4ade80" },
         COMPLET: { background: "#f8717118", color: "#f87171" },
     },
     light: {
-        OUVERT:  { background: "#dcfce7", color: "#16a34a" },
+        OUVERT: { background: "#dcfce7", color: "#16a34a" },
         COMPLET: { background: "#fee2e2", color: "#ef4444" },
     },
 };
-
-const FILTER_LABELS = { TOUS: "Tous", OUVERT: "Ouvert", COMPLET: "Complet" };
 
 function useTheme() {
     const [mode, setMode] = useState(() => localStorage.getItem("theme") || "dark");
@@ -107,12 +106,12 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
     const [hovered, setHovered] = useState(false);
     return (
         <div
+            className="atrajets-stat-card"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
                 background: theme.surface,
                 borderRadius: 16,
-                padding: "20px 22px",
                 boxShadow: hovered ? theme.shadow : theme.shadowSm,
                 border: `1px solid ${hovered ? iconColor + "50" : theme.border}`,
                 transition: "all 0.22s ease",
@@ -120,7 +119,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
                 cursor: "default",
             }}
         >
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
                 <p style={{ fontSize: 12, color: theme.sub, margin: 0, fontWeight: 500, letterSpacing: "0.02em" }}>
                     {label}
                 </p>
@@ -132,7 +131,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
                     <Icon size={17} color={iconColor} strokeWidth={2} />
                 </div>
             </div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: valueColor ?? theme.text, lineHeight: 1, letterSpacing: "-1px" }}>
+            <div className="atrajets-stat-val" style={{ color: valueColor ?? theme.text }}>
                 {value}
             </div>
         </div>
@@ -172,6 +171,13 @@ function ActionBtn({ label, icon: Icon, onClick, color, bg }) {
 ───────────────────────────────────────────── */
 export default function AdminTrajets() {
     const { theme, mode } = useTheme();
+    const { t } = useI18n();
+
+    const FILTER_LABELS = {
+        TOUS: t("admin.all"),
+        OUVERT: t("admin.open"),
+        COMPLET: t("admin.completed"),
+    };
 
     const [trajets, setTrajets] = useState([]);
     const [filtered, setFiltered] = useState([]);
@@ -205,10 +211,10 @@ export default function AdminTrajets() {
     const handleSearch = (value) => {
         setSearch(value);
 
-        const data = trajets.filter(t =>
-            t.origine?.toLowerCase().includes(value.toLowerCase()) ||
-            t.destination?.toLowerCase().includes(value.toLowerCase()) ||
-            t.voyageurEmail?.toLowerCase().includes(value.toLowerCase())
+        const data = trajets.filter(T =>
+            T.origine?.toLowerCase().includes(value.toLowerCase()) ||
+            T.destination?.toLowerCase().includes(value.toLowerCase()) ||
+            T.voyageurEmail?.toLowerCase().includes(value.toLowerCase())
         );
 
         setFiltered(data);
@@ -223,7 +229,7 @@ export default function AdminTrajets() {
         if (status === "TOUS") {
             setFiltered(trajets);
         } else {
-            setFiltered(trajets.filter(t => t.statut === status));
+            setFiltered(trajets.filter(T => T.statut === status));
         }
     };
 
@@ -231,13 +237,13 @@ export default function AdminTrajets() {
     // ❌ DELETE
     // =============================
     const handleDelete = async (id) => {
-        if (!window.confirm("Supprimer ce trajet ?")) return;
+        if (!window.confirm(t("admin.confirmDeleteTrajet"))) return;
 
         try {
             await api.delete(`/trajets/${id}`);
             fetchTrajets();
         } catch (err) {
-            alert("Erreur suppression ❌");
+            alert(t("admin.deleteError"));
         }
     };
 
@@ -247,9 +253,9 @@ export default function AdminTrajets() {
     // =============================
     // 📊 STATS
     // =============================
-    const total    = trajets.length;
-    const ouverts  = trajets.filter(t => t.statut === "OUVERT").length;
-    const complets = trajets.filter(t => t.statut === "COMPLET").length;
+    const total = trajets.length;
+    const ouverts = trajets.filter(T => T.statut === "OUVERT").length;
+    const complets = trajets.filter(T => T.statut === "COMPLET").length;
 
     const getStatusBadge = (statut) => {
         const map = STATUS_BADGE[mode] ?? STATUS_BADGE.dark;
@@ -271,6 +277,12 @@ export default function AdminTrajets() {
                     from { opacity: 0; transform: translateY(8px); }
                     to   { opacity: 1; transform: translateY(0); }
                 }
+                .atrajets-stat-card { padding: 20px 22px; }
+                .atrajets-stat-val  { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+                @media (max-width: 639px) {
+                    .atrajets-stat-card { padding: 12px 14px; }
+                    .atrajets-stat-val  { font-size: 22px; }
+                }
             `}</style>
 
             {/* ── HEADER ── */}
@@ -285,19 +297,19 @@ export default function AdminTrajets() {
                 </div>
                 <div>
                     <h1 style={{ fontSize: 20, fontWeight: 700, color: theme.text, margin: 0, letterSpacing: "-0.4px" }}>
-                        Gestion des trajets
+                        {t("admin.trajetsManagement")}
                     </h1>
                     <p style={{ fontSize: 12, color: theme.sub, margin: 0, marginTop: 2 }}>
-                        {filtered.length} résultat{filtered.length !== 1 ? "s" : ""} · Administration et suivi des trajets utilisateurs
+                        {filtered.length} résultat{filtered.length} {t("admin.results")} · {t("admin.trajetsManagementSubtitle")}
                     </p>
                 </div>
             </div>
 
             {/* ── STATS ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-                <StatCard label="Total trajets" value={total}    icon={Truck}        iconColor={theme.accent} iconBg={theme.accentBg}                     theme={theme} />
-                <StatCard label="Ouverts"       value={ouverts}  icon={CheckCircle}  iconColor={theme.green}  iconBg={theme.greenBg}  valueColor={theme.green}  theme={theme} />
-                <StatCard label="Complets"      value={complets} icon={Package}      iconColor={theme.red}    iconBg={theme.redBg}    valueColor={theme.red}    theme={theme} />
+            <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: 14 }}>
+                <StatCard label={t("admin.totalTrajets")} value={total} icon={Truck} iconColor={theme.accent} iconBg={theme.accentBg} theme={theme} />
+                <StatCard label={t("admin.openTrajets")} value={ouverts} icon={CheckCircle} iconColor={theme.green} iconBg={theme.greenBg} valueColor={theme.green} theme={theme} />
+                <StatCard label={t("admin.completedTrajets")} value={complets} icon={Package} iconColor={theme.red} iconBg={theme.redBg} valueColor={theme.red} theme={theme} />
             </div>
 
             {/* ── SEARCH + FILTERS ── */}
@@ -311,7 +323,7 @@ export default function AdminTrajets() {
                     }} />
                     <input
                         type="text"
-                        placeholder="Rechercher (ville, email...)"
+                        placeholder={t("admin.searchTrajets")}
                         value={search}
                         onChange={(e) => handleSearch(e.target.value)}
                         onFocus={e => {
@@ -340,9 +352,9 @@ export default function AdminTrajets() {
                 {/* Filter pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {["TOUS", "OUVERT", "COMPLET"].map((status) => {
-                        const active  = filter === status;
+                        const active = filter === status;
                         const hovered = filterHover === status;
-                        const badge   = STATUS_BADGE[mode]?.[status];
+                        const badge = STATUS_BADGE[mode]?.[status];
                         return (
                             <button
                                 key={status}
@@ -382,7 +394,7 @@ export default function AdminTrajets() {
                 {loading && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "64px 0", gap: 16 }}>
                         <Spinner color={theme.accent} />
-                        <p style={{ fontSize: 13, color: theme.sub, margin: 0 }}>Chargement des trajets...</p>
+                        <p style={{ fontSize: 13, color: theme.sub, margin: 0 }}>{t("admin.loadingTrajets")}</p>
                     </div>
                 )}
 
@@ -398,10 +410,10 @@ export default function AdminTrajets() {
                         </div>
                         <div style={{ textAlign: "center" }}>
                             <p style={{ fontSize: 15, fontWeight: 600, color: theme.text, margin: "0 0 5px" }}>
-                                Aucun trajet trouvé
+                                {t("admin.noTrajetsFound")}
                             </p>
                             <p style={{ fontSize: 12, color: theme.sub, margin: 0 }}>
-                                Modifiez vos filtres ou votre recherche
+                                {t("admin.modifyFilters")}
                             </p>
                         </div>
                     </div>
@@ -409,12 +421,12 @@ export default function AdminTrajets() {
 
                 {/* Table */}
                 {!loading && filtered.length > 0 && (
-                    <div style={{ overflowX: "auto" }}>
+                    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
                         <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
 
                             <thead>
                                 <tr style={{ background: theadBg, borderBottom: `1px solid ${theme.border}` }}>
-                                    {["ID", "Voyageur", "Route", "Date", "Capacité", "Statut", "Colis", "Action"].map(h => (
+                                    {["ID", t("admin.traveler"), t("admin.route"), t("admin.date"), t("admin.capacity"), t("admin.status"), t("admin.packages"), t("admin.actions")].map(h => (
                                         <th key={h} style={{
                                             padding: "12px 16px",
                                             textAlign: "left",
@@ -432,14 +444,14 @@ export default function AdminTrajets() {
                             </thead>
 
                             <tbody>
-                                {filtered.map((t) => (
+                                {filtered.map((T) => (
                                     <tr
-                                        key={t.id}
-                                        onMouseEnter={() => setRowHover(t.id)}
+                                        key={T.id}
+                                        onMouseEnter={() => setRowHover(T.id)}
                                         onMouseLeave={() => setRowHover(null)}
                                         style={{
                                             borderBottom: `1px solid ${theme.border}`,
-                                            background: rowHover === t.id ? theme.muted : "transparent",
+                                            background: rowHover === T.id ? theme.muted : "transparent",
                                             transition: "background 0.15s",
                                         }}
                                     >
@@ -455,7 +467,7 @@ export default function AdminTrajets() {
                                                 borderRadius: 6,
                                                 letterSpacing: "0.05em",
                                             }}>
-                                                {formatId(t.id)}
+                                                {formatId(T.id)}
                                             </span>
                                         </td>
 
@@ -491,7 +503,7 @@ export default function AdminTrajets() {
 
                                         {/* Capacité */}
                                         <td style={{ padding: "15px 16px", color: theme.textMid }}>
-                                            {t.capaciteKg} kg
+                                            {t.capaciteKg} {t("admin.kg")}
                                         </td>
 
                                         {/* Statut */}
@@ -506,7 +518,7 @@ export default function AdminTrajets() {
                                                 letterSpacing: "0.03em",
                                                 whiteSpace: "nowrap",
                                             }}>
-                                                {t.statut}
+                                                {t.statut === "OUVERT" ? t("admin.open") : t("admin.completed")}
                                             </span>
                                         </td>
 
@@ -528,7 +540,7 @@ export default function AdminTrajets() {
                                         {/* Action */}
                                         <td style={{ padding: "15px 16px" }}>
                                             <ActionBtn
-                                                label="Supprimer"
+                                                label={t("admin.delete")}
                                                 icon={Trash2}
                                                 onClick={() => handleDelete(t.id)}
                                                 color={theme.red}

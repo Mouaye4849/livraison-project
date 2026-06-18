@@ -31,19 +31,19 @@ import type { ApiError } from '@/types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:           '#0b0508',
-  bgCard:       '#140c0e',
-  surface:      '#1a1012',
-  border:       'rgba(255,255,255,0.06)',
-  borderFocus:  'rgba(220,38,38,0.50)',
+  bg:           '#eef1ee',
+  bgCard:       '#ffffff',
+  surface:      '#f0f4f0',
+  border:       'rgba(0,0,0,0.08)',
+  borderFocus:  'rgba(34,197,94,0.50)',
+  grn:          '#22c55e',
+  grnDk:        '#166534',
+  grnGlow:      'rgba(34,197,94,0.18)',
   red:          '#dc2626',
-  redMid:       '#b91c1c',
-  redDim:       'rgba(220,38,38,0.14)',
-  redGlow:      'rgba(220,38,38,0.22)',
-  redGlowSoft:  'rgba(220,38,38,0.09)',
-  white:        '#ffffff',
-  gray:         '#9ca3af',
-  grayDim:      '#5a5a5a',
+  redDim:       'rgba(220,38,38,0.10)',
+  white:        '#1a2e1a',
+  gray:         '#6b7280',
+  grayDim:      '#9ca3af',
 } as const;
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -175,7 +175,7 @@ function InputField({
       <Ionicons
         name={icon}
         size={18}
-        color={focused ? C.red : C.grayDim}
+        color={focused ? C.grn : C.grayDim}
         style={styles.inputIcon}
       />
       <TextInput
@@ -382,11 +382,11 @@ export default function LoginScreen() {
                     activeOpacity={1}
                   >
                     {loading
-                      ? <ActivityIndicator color={C.white} size="small" />
+                      ? <ActivityIndicator color="#0f1419" size="small" />
                       : (
                         <>
                           <Text style={styles.btnText}>Se connecter</Text>
-                          <Ionicons name="arrow-forward" size={18} color={C.white} />
+                          <Ionicons name="arrow-forward" size={18} color="rgba(15,20,25,0.60)" />
                         </>
                       )
                     }
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     width: 340,
     height: 340,
     borderRadius: 170,
-    backgroundColor: 'rgba(180,20,20,0.13)',
+    backgroundColor: 'rgba(34,197,94,0.10)',
   },
   bgBlobBottomLeft: {
     position: 'absolute',
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     width: 360,
     height: 360,
     borderRadius: 180,
-    backgroundColor: 'rgba(140,10,10,0.10)',
+    backgroundColor: 'rgba(34,197,94,0.12)',
   },
   bgBlobCenter: {
     position: 'absolute',
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(220,38,38,0.04)',
+    backgroundColor: 'rgba(34,197,94,0.08)',
   },
 
   // ── LOGO HERO
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     width: 220,
     height: 120,
     borderRadius: 60,
-    backgroundColor: C.redGlow,
+    backgroundColor: C.grnGlow,
   },
   logoGlowInner: {
     position: 'absolute',
@@ -482,10 +482,10 @@ const styles = StyleSheet.create({
     width: 160,
     height: 80,
     borderRadius: 40,
-    backgroundColor: C.redGlow,
+    backgroundColor: C.grnGlow,
   },
   logoCard: {
-    backgroundColor: C.white,
+    backgroundColor: C.bgCard,
     borderRadius: 20,
     paddingHorizontal: 28,
     paddingVertical: 16,
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
   },
   heroTitle: {
     color: C.white,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     lineHeight: 30,
   },
   heroTitleRed: {
-    color: C.red,
+    color: C.grn,
   },
   heroSub: {
     color: C.gray,
@@ -537,9 +537,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(0,0,0,0.07)',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#22c55e',
   },
   badgeText: {
-    color: 'rgba(255,255,255,0.42)',
+    color: 'rgba(0,0,0,0.45)',
     fontSize: 10,
     fontWeight: '500',
     letterSpacing: 0.3,
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.bgCard,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(220,38,38,0.14)',
+    borderColor: 'rgba(34,197,94,0.20)',
     padding: 24,
     marginBottom: 20,
     gap: 4,
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    color: 'rgba(255,255,255,0.42)',
+    color: 'rgba(0,0,0,0.50)',
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 0.5,
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   inputWrapFocused: {
     borderColor: C.borderFocus,
-    backgroundColor: 'rgba(220,38,38,0.05)',
+    backgroundColor: 'rgba(34,197,94,0.06)',
   },
   inputIcon: {
     marginRight: 10,
@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   btn: {
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 14,
     height: 56,
     flexDirection: 'row',
@@ -680,9 +680,9 @@ const styles = StyleSheet.create({
     gap: 8,
     ...Platform.select({
       ios: {
-        shadowColor: C.red,
+        shadowColor: C.grnDk,
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.45,
+        shadowOpacity: 0.55,
         shadowRadius: 18,
       },
       android: { elevation: 10 },
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   btnText: {
-    color: C.white,
+    color: '#0f1419',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.3,
@@ -710,7 +710,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   footerLink: {
-    color: C.red,
+    color: C.grn,
     fontSize: 14,
     fontWeight: '700',
   },

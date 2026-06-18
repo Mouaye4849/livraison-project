@@ -27,15 +27,16 @@ const { width } = Dimensions.get('window');
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:   '#0a0a0a',
-  card: '#141414',
-  bd:   'rgba(255,255,255,0.07)',
-  red:  '#dc2626',
-  soft: 'rgba(220,38,38,0.09)',
-  wh:   '#ffffff',
-  gr:   '#9ca3af',
-  dim:  '#555555',
-  grn:  '#22c55e',
+  bg:     '#eef1ee',
+  card:   '#ffffff',
+  bd:     'rgba(0,0,0,0.08)',
+  grn:    '#22c55e',
+  grnDk:  '#166534',
+  grnDim: 'rgba(34,197,94,0.12)',
+  soft:   'rgba(34,197,94,0.10)',
+  wh:     '#1a2e1a',
+  gr:     '#6b7280',
+  dim:    '#9ca3af',
 } as const;
 
 const ILLUS   = Math.min(width * 0.68, 260);
@@ -149,11 +150,11 @@ function Illustration() {
       ]} />
 
       {/* Concentric rings */}
-      <View style={[S.ring, { width: ILLUS * 0.82, height: ILLUS * 0.82, borderRadius: ILLUS * 0.41, borderWidth: 1, borderColor: 'rgba(220,38,38,0.18)' }]} />
-      <View style={[S.ring, { width: ILLUS * 0.62, height: ILLUS * 0.62, borderRadius: ILLUS * 0.31, borderWidth: 1, borderColor: 'rgba(220,38,38,0.30)' }]} />
+      <View style={[S.ring, { width: ILLUS * 0.82, height: ILLUS * 0.82, borderRadius: ILLUS * 0.41, borderWidth: 1, borderColor: 'rgba(74,222,128,0.18)' }]} />
+      <View style={[S.ring, { width: ILLUS * 0.62, height: ILLUS * 0.62, borderRadius: ILLUS * 0.31, borderWidth: 1, borderColor: 'rgba(74,222,128,0.30)' }]} />
 
       {/* Elliptical flight path — subtle globe-tilt feel */}
-      <View style={[S.ring, { width: PLANE_R * 2, height: PLANE_R * 2 * 0.56, borderRadius: PLANE_R, borderWidth: 1, borderColor: 'rgba(220,38,38,0.13)' }]} />
+      <View style={[S.ring, { width: PLANE_R * 2, height: PLANE_R * 2 * 0.56, borderRadius: PLANE_R, borderWidth: 1, borderColor: 'rgba(74,222,128,0.13)' }]} />
 
       {/* Rotating orbit ring with dots */}
       <Animated.View style={[
@@ -161,7 +162,7 @@ function Illustration() {
         { width: ILLUS * 0.88, height: ILLUS * 0.88, borderRadius: ORBIT_R },
         orbitS,
       ]}>
-        <View style={{ position: 'absolute', top: -4,         left: topDotL,    width: 8, height: 8, borderRadius: 4, backgroundColor: C.red }} />
+        <View style={{ position: 'absolute', top: -4,         left: topDotL,    width: 8, height: 8, borderRadius: 4, backgroundColor: C.grn }} />
         <View style={{ position: 'absolute', bottom: -3,      left: bottomDotL, width: 6, height: 6, borderRadius: 3, backgroundColor: C.grn }} />
         <View style={{ position: 'absolute', right: -4,       top: rightDotT,   width: 8, height: 8, borderRadius: 4, backgroundColor: '#facc15' }} />
       </Animated.View>
@@ -169,13 +170,13 @@ function Illustration() {
       {/* Central stage with delivery truck */}
       <View style={S.stage}>
         <Animated.View style={truckS}>
-          <MaterialCommunityIcons name="truck-fast-outline" size={52} color={C.red} />
+          <MaterialCommunityIcons name="truck-fast-outline" size={52} color={C.grn} />
         </Animated.View>
       </View>
 
       {/* Floating location pill */}
       <Animated.View style={[S.pill, { position: 'absolute', top: ILLUS * 0.08, left: -18 }, floatAS]}>
-        <Ionicons name="location" size={13} color={C.red} />
+        <Ionicons name="location" size={13} color={C.grn} />
         <Text style={S.pillTxt}>Nouakchott</Text>
       </Animated.View>
 
@@ -193,7 +194,7 @@ function Illustration() {
 
       {/* Orbiting airplane */}
       <Animated.View style={[{ position: 'absolute' }, planeAnim]}>
-        <Ionicons name="airplane" size={14} color={C.red} />
+        <Ionicons name="airplane" size={14} color={C.grn} />
       </Animated.View>
 
     </View>
@@ -210,7 +211,7 @@ export default function LandingScreen() {
 
   return (
     <View style={S.root}>
-      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
 
       {/* Ambient gradient blobs */}
       <View style={[S.blob, { top: -140, right: -100, width: 400, height: 400, borderRadius: 200, backgroundColor: 'rgba(180,14,14,0.11)' }]} />
@@ -245,7 +246,7 @@ export default function LandingScreen() {
             <View style={S.textSection}>
               <Text style={S.headline}>
                 {'Livrez partout en\n'}
-                <Text style={{ color: C.red }}>Mauritanie</Text>
+                <Text style={{ color: C.grn }}>Mauritanie</Text>
               </Text>
               <Text style={S.sub}>
                 Connectez-vous avec des voyageurs de confiance.{'\n'}Rapide, sécurisé, partout.
@@ -280,7 +281,7 @@ export default function LandingScreen() {
                   onPress={() => router.push('/login')}
                 >
                   <Text style={S.btnLoginTxt}>Se connecter</Text>
-                  <Ionicons name="arrow-forward" size={18} color={C.wh} />
+                  <Ionicons name="arrow-forward" size={18} color="rgba(15,20,25,0.60)" />
                 </TouchableOpacity>
               </Animated.View>
 
@@ -298,7 +299,7 @@ export default function LandingScreen() {
 
               <Text style={S.legal}>
                 {'En continuant, vous acceptez nos '}
-                <Text style={{ color: 'rgba(220,38,38,0.65)', fontWeight: '600' }}>
+                <Text style={{ color: 'rgba(74,222,128,0.85)', fontWeight: '600' }}>
                   {"Conditions d'utilisation"}
                 </Text>
               </Text>
@@ -349,7 +350,7 @@ const S = StyleSheet.create({
     width: 210,
     height: 76,
     borderRadius: 38,
-    backgroundColor: 'rgba(220,38,38,0.17)',
+    backgroundColor: 'rgba(74,222,128,0.17)',
   },
   logoCard: {
     backgroundColor: C.wh,
@@ -379,11 +380,11 @@ const S = StyleSheet.create({
     borderRadius: CTR_R,
     backgroundColor: C.card,
     borderWidth: 1,
-    borderColor: 'rgba(220,38,38,0.28)',
+    borderColor: 'rgba(74,222,128,0.28)',
     alignItems: 'center',
     justifyContent: 'center',
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.28, shadowRadius: 20 },
+      ios:     { shadowColor: C.grn, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.28, shadowRadius: 20 },
       android: { elevation: 8 },
     }),
   },
@@ -393,7 +394,7 @@ const S = StyleSheet.create({
     gap: 5,
     backgroundColor: C.card,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.09)',
+    borderColor: 'rgba(0,0,0,0.08)',
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -459,19 +460,19 @@ const S = StyleSheet.create({
   },
   btnLogin: {
     height: 58,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 9,
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.50, shadowRadius: 18 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.55, shadowRadius: 18 },
       android: { elevation: 10 },
     }),
   },
   btnLoginTxt: {
-    color: C.wh,
+    color: '#0f1419',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.2,
@@ -480,8 +481,8 @@ const S = StyleSheet.create({
     height: 56,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.13)',
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(0,0,0,0.10)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     alignItems: 'center',
     justifyContent: 'center',
   },

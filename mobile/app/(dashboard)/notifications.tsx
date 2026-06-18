@@ -18,22 +18,24 @@ import type { Notification } from '@/types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:      '#0a0a0a',
-  card:    '#141414',
-  bd:      'rgba(255,255,255,0.07)',
-  red:     '#dc2626',
-  redDim:  'rgba(220,38,38,0.12)',
-  wh:      '#ffffff',
-  gr:      '#9ca3af',
-  dim:     '#4b5563',
-  grn:     '#22c55e',
-  grnDim:  'rgba(34,197,94,0.12)',
-  ylw:     '#facc15',
-  ylwDim:  'rgba(250,204,21,0.12)',
-  blu:     '#3b82f6',
-  bluDim:  'rgba(59,130,246,0.18)',
-  pur:     '#a855f7',
-  purDim:  'rgba(168,85,247,0.12)',
+  bg:     '#eef1ee',
+  card:   '#ffffff',
+  bd:     'rgba(0,0,0,0.08)',
+  grn:    '#22c55e',
+  grnDk:  '#166534',
+  grnDim: 'rgba(34,197,94,0.12)',
+  grnBd:  'rgba(34,197,94,0.25)',
+  wh:     '#1a2e1a',
+  gr:     '#6b7280',
+  dim:    '#9ca3af',
+  red:    '#dc2626',
+  redDim: 'rgba(220,38,38,0.10)',
+  ylw:    '#d97706',
+  ylwDim: 'rgba(217,119,6,0.10)',
+  blu:    '#2563eb',
+  bluDim: 'rgba(37,99,235,0.10)',
+  pur:    '#7c3aed',
+  purDim: 'rgba(124,58,237,0.10)',
 } as const;
 
 const POLL_INTERVAL = 10_000; // 10 s — same as web
@@ -55,7 +57,7 @@ function timeAgo(dateStr: string): string {
 // Derive a contextual icon from the notification message text
 function iconForMessage(msg: string): { name: string; color: string; bg: string } {
   const m = msg.toLowerCase();
-  if (m.includes('colis'))           return { name: 'cube',             color: C.red, bg: C.redDim };
+  if (m.includes('colis'))           return { name: 'cube',             color: C.grn, bg: C.grnDim };
   if (m.includes('trajet') || m.includes('voyage'))
                                      return { name: 'airplane',         color: C.blu, bg: C.bluDim };
   if (m.includes('paiement') || m.includes('payé') || m.includes('mru'))
@@ -186,7 +188,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={S.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <SafeAreaView style={S.safe} edges={['top']}>
 
         {/* ── Header */}
@@ -216,7 +218,7 @@ export default function NotificationsScreen() {
               disabled={marking}
             >
               {marking
-                ? <ActivityIndicator size="small" color={C.red} />
+                ? <ActivityIndicator size="small" color={C.grn} />
                 : <Text style={S.markAllTxt}>Tout lire</Text>
               }
             </TouchableOpacity>
@@ -228,7 +230,7 @@ export default function NotificationsScreen() {
         {/* ── Content */}
         {loading ? (
           <View style={S.center}>
-            <ActivityIndicator color={C.red} size="large" />
+            <ActivityIndicator color={C.grn} size="large" />
           </View>
         ) : (
           <FlatList
@@ -240,8 +242,8 @@ export default function NotificationsScreen() {
               <RefreshControl
                 refreshing={refresh}
                 onRefresh={() => fetch(true)}
-                tintColor={C.red}
-                colors={[C.red]}
+                tintColor={C.grn}
+                colors={[C.grn]}
               />
             }
             ListHeaderComponent={
@@ -311,7 +313,7 @@ const S = StyleSheet.create({
   },
   title: { color: C.wh, fontSize: 20, fontWeight: '800', letterSpacing: -0.4 },
   countBadge: {
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -319,18 +321,18 @@ const S = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 6,
   },
-  countBadgeTxt: { color: C.wh, fontSize: 11, fontWeight: '800' },
+  countBadgeTxt: { color: '#0f1419', fontSize: 11, fontWeight: '800' },
   markAllBtn: {
     width: 72,
     height: 34,
     borderRadius: 10,
-    backgroundColor: C.redDim,
+    backgroundColor: C.grnDim,
     borderWidth: 1,
-    borderColor: 'rgba(220,38,38,0.30)',
+    borderColor: C.grnBd,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markAllTxt: { color: C.red, fontSize: 12, fontWeight: '700' },
+  markAllTxt: { color: C.grn, fontSize: 12, fontWeight: '700' },
 
   // ── List
   list: { paddingHorizontal: 16, paddingBottom: 32, gap: 8 },
@@ -421,9 +423,9 @@ const S = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    borderColor: 'rgba(0,0,0,0.07)',
     alignItems: 'center',
     justifyContent: 'center',
   },

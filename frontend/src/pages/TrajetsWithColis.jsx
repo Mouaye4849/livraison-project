@@ -10,8 +10,11 @@ import {
     ArrowRight,
     Inbox,
 } from "lucide-react";
+import GpsShareBadge from "../components/GpsShareBadge";
+import { useI18n } from "../i18n/index.jsx";
 
 export default function TrajetsWithColis() {
+    const { t } = useI18n();
 
     const [trajets, setTrajets] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +29,7 @@ export default function TrajetsWithColis() {
             setTrajets(res.data);
         } catch (err) {
             console.error(err);
-            setMessage("Erreur chargement ❌");
+            setMessage(t("trajetsWithColis.loadError"));
         } finally {
             setLoading(false);
         }
@@ -42,10 +45,10 @@ export default function TrajetsWithColis() {
             setProcessing(prev => ({ ...prev, [Id]: true }));
             setMessage(null);
             await api.put(`/colis/${Id}/start`);
-            setMessage("Colis en cours de livraison 🚚");
+            setMessage(t("trajetsWithColis.startSuccess"));
             fetchTrajets();
         } catch (err) {
-            setMessage("Erreur ❌");
+            setMessage(t("trajetsWithColis.genericError"));
         } finally {
             setProcessing(prev => ({ ...prev, [Id]: false }));
         }
@@ -57,10 +60,10 @@ export default function TrajetsWithColis() {
             setProcessing(prev => ({ ...prev, [Id]: true }));
             setMessage(null);
             await api.put(`/colis/${Id}/finish`);
-            setMessage("Colis livré avec succès ✅");
+            setMessage(t("trajetsWithColis.finishSuccess"));
             fetchTrajets();
         } catch (err) {
-            setMessage("Erreur ❌");
+            setMessage(t("trajetsWithColis.genericError"));
         } finally {
             setProcessing(prev => ({ ...prev, [Id]: false }));
         }
@@ -77,12 +80,22 @@ export default function TrajetsWithColis() {
         }
     };
 
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case "ACCEPTE":  return t("trajetsWithColis.statusAccepte");
+            case "EN_COURS": return t("trajetsWithColis.statusEnCours");
+            case "LIVRE":    return t("trajetsWithColis.statusLivre");
+            case "TERMINE":  return t("trajetsWithColis.statusTermine");
+            default:         return status;
+        }
+    };
+
 
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 size={28} className="animate-spin text-[#1e3a8a]" />
-                <p className="text-gray-500 text-sm">Chargement de vos trajets...</p>
+                <p className="text-gray-500 text-sm">{t("trajetsWithColis.loading")}</p>
             </div>
         );
     }
@@ -97,10 +110,10 @@ export default function TrajetsWithColis() {
                 </div>
                 <div>
                     <h2 className="text-2xl font-bold dark:text-white text-gray-900 tracking-tight">
-                        Mes trajets avec colis
+                        {t("trajetsWithColis.title")}
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        {trajets.length} trajet{trajets.length !== 1 ? "s" : ""} en cours
+                        {trajets.length} {trajets.length !== 1 ? t("trajetsWithColis.countPlural") : t("trajetsWithColis.countSingular")}
                     </p>
                 </div>
             </div>
@@ -119,8 +132,8 @@ export default function TrajetsWithColis() {
                         <Inbox size={28} className="text-gray-400" />
                     </div>
                     <div className="text-center">
-                        <p className="dark:text-white text-gray-900 font-semibold text-base">Aucun trajet trouvé</p>
-                        <p className="text-gray-500 text-sm mt-1">Vos trajets avec colis apparaîtront ici</p>
+                        <p className="dark:text-white text-gray-900 font-semibold text-base">{t("trajetsWithColis.emptyTitle")}</p>
+                        <p className="text-gray-500 text-sm mt-1">{t("trajetsWithColis.emptyDesc")}</p>
                     </div>
                 </div>
             )}
@@ -166,9 +179,14 @@ export default function TrajetsWithColis() {
                                             {/* STATUS */}
                                             <div>
                                                 <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(colis.statut)}`}>
-                                                    {colis.statut}
+                                                    {getStatusLabel(colis.statut)}
                                                 </span>
                                             </div>
+
+                                            {/* GPS sharing — auto-starts when EN_COURS */}
+                                            {colis.statut === "EN_COURS" && (
+                                                <GpsShareBadge colisId={colis.id} />
+                                            )}
 
                                             {/* ACTIONS */}
                                             <div>
@@ -182,7 +200,7 @@ export default function TrajetsWithColis() {
                                                             ? <Loader2 size={14} className="animate-spin" />
                                                             : <PlayCircle size={14} />
                                                         }
-                                                        Démarrer
+                                                        {t("trajetsWithColis.start")}
                                                     </button>
                                                 )}
 
@@ -196,21 +214,21 @@ export default function TrajetsWithColis() {
                                                             ? <Loader2 size={14} className="animate-spin" />
                                                             : <CheckCircle size={14} />
                                                         }
-                                                        Terminer
+                                                        {t("trajetsWithColis.finish")}
                                                     </button>
                                                 )}
 
                                                 {colis.statut === "LIVRE" && (
                                                     <div className="h-11 flex items-center gap-2 text-green-400 text-sm font-medium">
                                                         <CheckCircle size={14} />
-                                                        Livré
+                                                        {t("trajetsWithColis.delivered")}
                                                     </div>
                                                 )}
 
                                                 {colis.statut === "TERMINE" && (
                                                     <div className="h-11 flex items-center gap-2 text-purple-400 text-sm font-medium">
                                                         <CheckCircle size={14} />
-                                                        Terminé
+                                                        {t("trajetsWithColis.completed")}
                                                     </div>
                                                 )}
                                             </div>
@@ -220,7 +238,7 @@ export default function TrajetsWithColis() {
                             ) : (
                                 <div className="col-span-full flex items-center gap-2 py-4 text-gray-400 text-sm">
                                     <Package size={14} />
-                                    Aucun colis pour ce trajet
+                                    {t("trajetsWithColis.noColisForTrajet")}
                                 </div>
                             )}
                         </div>

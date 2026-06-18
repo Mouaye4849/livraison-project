@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import {
@@ -12,9 +12,13 @@ import {
     CheckCircle2,
     XCircle,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 /* ─── InputField ───────────────────────────── */
-function InputField({ icon: Icon, label, name, value, onChange, type = "text", ...props }) {
+const InputField = forwardRef(function InputField(
+    { icon: Icon, label, name, value, onChange, type = "text", ...props },
+    ref
+) {
     const [focused, setFocused] = useState(false);
     const hasValue = value !== "" && value !== undefined && value !== null;
 
@@ -40,19 +44,20 @@ function InputField({ icon: Icon, label, name, value, onChange, type = "text", .
             >
                 <Icon size={16} className={`shrink-0 ${focused ? "text-[#1e3a8a]" : "text-gray-400"}`} />
                 <input
+                    ref={ref}
                     type={type}
                     name={name}
-                    value={value || ""}
+                    value={value ?? ""}
                     onChange={onChange}
                     onFocus={() => setFocused(true)}
                     onBlur={() => setFocused(false)}
-                    className="flex-1 bg-transparent text-sm dark:text-white text-gray-900 dark:placeholder-gray-700 placeholder-gray-400 outline-none"
+                    className={`flex-1 bg-transparent text-sm dark:text-white text-gray-900 dark:placeholder-gray-700 placeholder-gray-400 outline-none${type === "date" ? " [color-scheme:light] dark:[color-scheme:dark]" : ""}`}
                     {...props}
                 />
             </div>
         </div>
     );
-}
+});
 
 /* ─── Section ───────────────────────────── */
 function FormSection({ title, description, children }) {
@@ -99,6 +104,7 @@ function Alert({ type, text }) {
 /* ─── MAIN ───────────────────────────── */
 export default function TrajetPage() {
 
+    const { t } = useI18n();
     const navigate = useNavigate();
     const firstRef = useRef(null);
 
@@ -133,7 +139,7 @@ export default function TrajetPage() {
                 capaciteKg: Number(form.capaciteKg)
             });
 
-            setMessage({ type: "success", text: "Trajet créé avec succès ! Redirection..." });
+            setMessage({ type: "success", text: t("trajetPage.successMsg") });
 
             setTimeout(() => {
                 navigate("/dashboard/trajets");
@@ -142,7 +148,7 @@ export default function TrajetPage() {
         } catch (err) {
             setMessage({
                 type: "error",
-                text: err.response?.data?.message || "Erreur création trajet"
+                text: err.response?.data?.message || t("trajetPage.errorMsg")
             });
         } finally {
             setLoading(false);
@@ -165,11 +171,11 @@ export default function TrajetPage() {
                         <Truck size={18} className="text-[#1e3a8a]" />
                     </div>
                     <h1 className="text-xl font-bold dark:text-white text-gray-900">
-                        Créer un trajet
+                        {t("trajetPage.title")}
                     </h1>
                 </div>
                 <p className="ml-12 text-sm text-gray-500">
-                    Publiez votre itinéraire de transport
+                    {t("trajetPage.subtitle")}
                 </p>
             </div>
 
@@ -186,10 +192,10 @@ export default function TrajetPage() {
                 className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-6 space-y-8 shadow-lg dark:shadow-black/40"
             >
 
-                <FormSection title="Itinéraire" description="Ville de départ et d'arrivée">
+                <FormSection title={t("trajetPage.sectionItinerary")} description={t("trajetPage.sectionItineraryDesc")}>
                     <InputField
                         icon={MapPin}
-                        label="Ville de départ"
+                        label={t("trajetPage.fromCity")}
                         name="origine"
                         value={form.origine}
                         onChange={handleChange}
@@ -200,7 +206,7 @@ export default function TrajetPage() {
                     <div className="relative">
                         <InputField
                             icon={MapPin}
-                            label="Ville d'arrivée"
+                            label={t("trajetPage.toCity")}
                             name="destination"
                             value={form.destination}
                             onChange={handleChange}
@@ -215,10 +221,10 @@ export default function TrajetPage() {
 
                 <div className="dark:border-t dark:border-[#1a1a1a] border-t border-gray-100" />
 
-                <FormSection title="Détails du trajet" description="Date et capacité disponible">
+                <FormSection title={t("trajetPage.sectionDetails")} description={t("trajetPage.sectionDetailsDesc")}>
                     <InputField
                         icon={Calendar}
-                        label="Date de départ"
+                        label={t("trajetPage.departDate")}
                         name="dateDepart"
                         type="date"
                         value={form.dateDepart}
@@ -229,7 +235,7 @@ export default function TrajetPage() {
 
                     <InputField
                         icon={Weight}
-                        label="Capacité (kg)"
+                        label={t("trajetPage.capacity")}
                         name="capaciteKg"
                         type="number"
                         value={form.capaciteKg}
@@ -255,12 +261,12 @@ export default function TrajetPage() {
                     {loading ? (
                         <>
                             <Loader2 size={16} className="animate-spin" />
-                            Création en cours…
+                            {t("trajetPage.creating")}
                         </>
                     ) : (
                         <>
                             <Send size={16} />
-                            Créer le trajet
+                            {t("trajetPage.submit")}
                         </>
                     )}
                 </button>

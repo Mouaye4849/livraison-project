@@ -8,78 +8,77 @@ import {
     enableUser
 } from "../services/adminService";
 
+import { useI18n } from "../i18n";
+
 /* ─────────────────────────────────────────────
    THEMES
 ───────────────────────────────────────────── */
 const THEMES = {
     dark: {
-        surface:   "#111128",
-        inputBg:   "#0a0a1a",
-        border:    "#1e1e30",
-        muted:     "#1c1c2e",
-        text:      "#e8e8f5",
-        textMid:   "#9494b8",
-        sub:       "#5a5a7a",
-        accent:    "#6366f1",
-        accentBg:  "#6366f118",
-        red:       "#f87171",
-        redBg:     "#f8717118",
-        green:     "#4ade80",
-        greenBg:   "#4ade8018",
-        yellow:    "#fbbf24",
-        yellowBg:  "#fbbf2418",
-        orange:    "#fb923c",
-        orangeBg:  "#fb923c18",
-        purple:    "#c084fc",
-        purpleBg:  "#c084fc18",
-        blue:      "#60a5fa",
-        blueBg:    "#60a5fa18",
-        shadow:    "0 4px 24px rgba(0,0,0,0.45)",
-        shadowSm:  "0 1px 6px rgba(0,0,0,0.25)",
+        surface: "#111128",
+        inputBg: "#0a0a1a",
+        border: "#1e1e30",
+        muted: "#1c1c2e",
+        text: "#e8e8f5",
+        textMid: "#9494b8",
+        sub: "#5a5a7a",
+        accent: "#6366f1",
+        accentBg: "#6366f118",
+        red: "#f87171",
+        redBg: "#f8717118",
+        green: "#4ade80",
+        greenBg: "#4ade8018",
+        yellow: "#fbbf24",
+        yellowBg: "#fbbf2418",
+        orange: "#fb923c",
+        orangeBg: "#fb923c18",
+        purple: "#c084fc",
+        purpleBg: "#c084fc18",
+        blue: "#60a5fa",
+        blueBg: "#60a5fa18",
+        shadow: "0 4px 24px rgba(0,0,0,0.45)",
+        shadowSm: "0 1px 6px rgba(0,0,0,0.25)",
     },
     light: {
-        surface:   "#ffffff",
-        inputBg:   "#f8f9fc",
-        border:    "#e5e7eb",
-        muted:     "#f3f4f6",
-        text:      "#0f172a",
-        textMid:   "#374151",
-        sub:       "#6b7280",
-        accent:    "#6366f1",
-        accentBg:  "#ede9fe",
-        red:       "#ef4444",
-        redBg:     "#fee2e2",
-        green:     "#16a34a",
-        greenBg:   "#dcfce7",
-        yellow:    "#d97706",
-        yellowBg:  "#fef3c7",
-        orange:    "#ea580c",
-        orangeBg:  "#ffedd5",
-        purple:    "#7e22ce",
-        purpleBg:  "#f3e8ff",
-        blue:      "#1d4ed8",
-        blueBg:    "#dbeafe",
-        shadow:    "0 4px 24px rgba(0,0,0,0.07)",
-        shadowSm:  "0 1px 4px rgba(0,0,0,0.05)",
+        surface: "#ffffff",
+        inputBg: "#f8f9fc",
+        border: "#e5e7eb",
+        muted: "#f3f4f6",
+        text: "#0f172a",
+        textMid: "#374151",
+        sub: "#6b7280",
+        accent: "#6366f1",
+        accentBg: "#ede9fe",
+        red: "#ef4444",
+        redBg: "#fee2e2",
+        green: "#16a34a",
+        greenBg: "#dcfce7",
+        yellow: "#d97706",
+        yellowBg: "#fef3c7",
+        orange: "#ea580c",
+        orangeBg: "#ffedd5",
+        purple: "#7e22ce",
+        purpleBg: "#f3e8ff",
+        blue: "#1d4ed8",
+        blueBg: "#dbeafe",
+        shadow: "0 4px 24px rgba(0,0,0,0.07)",
+        shadowSm: "0 1px 4px rgba(0,0,0,0.05)",
     },
 };
 
 const ROLE_BADGE = {
     dark: {
-        ROLE_ADMIN:    { background: "#2e1a4a55", color: "#c084fc" },
+        ROLE_ADMIN: { background: "#2e1a4a55", color: "#c084fc" },
         ROLE_VOYAGEUR: { background: "#1e3a5f55", color: "#60a5fa" },
-        ROLE_USER:     { background: "#1c1c2e",   color: "#5a5a7a" },
+        ROLE_USER: { background: "#1c1c2e", color: "#5a5a7a" },
     },
     light: {
-        ROLE_ADMIN:    { background: "#f3e8ff", color: "#7e22ce" },
+        ROLE_ADMIN: { background: "#f3e8ff", color: "#7e22ce" },
         ROLE_VOYAGEUR: { background: "#dbeafe", color: "#1d4ed8" },
-        ROLE_USER:     { background: "#f3f4f6", color: "#6b7280" },
+        ROLE_USER: { background: "#f3f4f6", color: "#6b7280" },
     },
 };
 
-const FILTER_LABELS = {
-    TOUS: "Tous", ROLE_ADMIN: "Admin", ROLE_VOYAGEUR: "Voyageur", ROLE_USER: "Utilisateur",
-};
 
 function useTheme() {
     const [mode, setMode] = useState(() => localStorage.getItem("theme") || "dark");
@@ -117,12 +116,12 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
     const [hovered, setHovered] = useState(false);
     return (
         <div
+            className="ausers-stat-card"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
                 background: theme.surface,
                 borderRadius: 16,
-                padding: "20px 22px",
                 boxShadow: hovered ? theme.shadow : theme.shadowSm,
                 border: `1px solid ${hovered ? iconColor + "50" : theme.border}`,
                 transition: "all 0.22s ease",
@@ -130,7 +129,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
                 cursor: "default",
             }}
         >
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
                 <p style={{ fontSize: 12, color: theme.sub, margin: 0, fontWeight: 500, letterSpacing: "0.02em" }}>
                     {label}
                 </p>
@@ -142,7 +141,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, valueColor, the
                     <Icon size={17} color={iconColor} strokeWidth={2} />
                 </div>
             </div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: valueColor ?? theme.text, lineHeight: 1, letterSpacing: "-1px" }}>
+            <div className="ausers-stat-val" style={{ color: valueColor ?? theme.text }}>
                 {value}
             </div>
         </div>
@@ -187,6 +186,7 @@ function ActionBtn({ label, icon: Icon, onClick, disabled, isLoading, color, bg 
 ───────────────────────────────────────────── */
 export default function AdminUsers() {
     const { theme, mode } = useTheme();
+    const { t } = useI18n();
 
     const [users, setUsers] = useState([]);
     const [filtered, setFiltered] = useState([]);
@@ -216,7 +216,7 @@ export default function AdminUsers() {
             setError(null);
         } catch (err) {
             console.error(err);
-            setError("❌ Erreur lors du chargement des utilisateurs");
+            setError(`❌ ${t("admin.loadUsersError")}`);
             setUsers([]);
             setFiltered([]);
         } finally {
@@ -246,7 +246,7 @@ export default function AdminUsers() {
     };
 
     const handleDelete = async (id) => {
-        const confirmDelete = window.confirm("⚠️ Supprimer cet utilisateur ?");
+        const confirmDelete = window.confirm(t("admin.confirmDeleteUser"));
         if (!confirmDelete) return;
         try {
             setDeletingId(id);
@@ -258,7 +258,7 @@ export default function AdminUsers() {
             );
         } catch (err) {
             console.error(err);
-            alert("❌ Erreur suppression");
+            alert(t("admin.deleteError"));
         } finally {
             setDeletingId(null);
         }
@@ -270,7 +270,7 @@ export default function AdminUsers() {
             await promoteUser(id);
             fetchUsers();
         } catch {
-            alert("❌ Error promote");
+            alert(t("admin.promoteError"));
         } finally {
             setActionLoading(null);
         }
@@ -282,7 +282,7 @@ export default function AdminUsers() {
             await disableUser(id);
             fetchUsers();
         } catch {
-            alert("❌ Error disable");
+            alert(t("admin.disableError"));
         } finally {
             setActionLoading(null);
         }
@@ -294,7 +294,7 @@ export default function AdminUsers() {
             await enableUser(id);
             fetchUsers();
         } catch {
-            alert("❌ Error enable");
+            alert(t("admin.enableError"));
         } finally {
             setActionLoading(null);
         }
@@ -305,10 +305,10 @@ export default function AdminUsers() {
         return map[role] ?? { background: theme.muted, color: theme.sub };
     };
 
-    const total     = users.length;
-    const admins    = users.filter(u => u.role === "ROLE_ADMIN").length;
+    const total = users.length;
+    const admins = users.filter(u => u.role === "ROLE_ADMIN").length;
     const voyageurs = users.filter(u => u.role === "ROLE_VOYAGEUR").length;
-    const clients   = users.filter(u => u.role === "ROLE_USER").length;
+    const clients = users.filter(u => u.role === "ROLE_USER").length;
 
     const theadBg = mode === "dark" ? "#0a0a1a60" : "#f8f9fc";
 
@@ -326,6 +326,12 @@ export default function AdminUsers() {
                     from { opacity: 0; transform: translateY(8px); }
                     to   { opacity: 1; transform: translateY(0); }
                 }
+                .ausers-stat-card { padding: 20px 22px; }
+                .ausers-stat-val  { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+                @media (max-width: 639px) {
+                    .ausers-stat-card { padding: 12px 14px; }
+                    .ausers-stat-val  { font-size: 22px; }
+                }
             `}</style>
 
             {/* ── HEADER ── */}
@@ -340,10 +346,10 @@ export default function AdminUsers() {
                 </div>
                 <div>
                     <h1 style={{ fontSize: 20, fontWeight: 700, color: theme.text, margin: 0, letterSpacing: "-0.4px" }}>
-                        Gestion des utilisateurs
+                        {t("admin.usersManagement")}
                     </h1>
                     <p style={{ fontSize: 12, color: theme.sub, margin: 0, marginTop: 2 }}>
-                        {filtered.length} résultat{filtered.length !== 1 ? "s" : ""} · mise à jour en temps réel
+                        {filtered.length} {t("admin.results")} · {t("admin.realTimeUpdate")}
                     </p>
                 </div>
             </div>
@@ -364,11 +370,11 @@ export default function AdminUsers() {
             )}
 
             {/* ── STATS ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
-                <StatCard label="Total"         value={total}     icon={Users}  iconColor={theme.accent} iconBg={theme.accentBg} theme={theme} />
-                <StatCard label="Admins"        value={admins}    icon={Shield} iconColor={theme.purple} iconBg={theme.purpleBg} valueColor={theme.purple} theme={theme} />
-                <StatCard label="Voyageurs"     value={voyageurs} icon={Truck}  iconColor={theme.blue}   iconBg={theme.blueBg}   valueColor={theme.blue}   theme={theme} />
-                <StatCard label="Utilisateurs"  value={clients}   icon={User}   iconColor={theme.sub}    iconBg={theme.muted}    theme={theme} />
+            <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 14 }}>
+                <StatCard label={t("admin.total")} value={total} icon={Users} iconColor={theme.accent} iconBg={theme.accentBg} theme={theme} />
+                <StatCard label={t("admin.admins")} value={admins} icon={Shield} iconColor={theme.purple} iconBg={theme.purpleBg} valueColor={theme.purple} theme={theme} />
+                <StatCard label={t("admin.travelers")} value={voyageurs} icon={Truck} iconColor={theme.blue} iconBg={theme.blueBg} valueColor={theme.blue} theme={theme} />
+                <StatCard label={t("admin.users")} value={clients} icon={User} iconColor={theme.sub} iconBg={theme.muted} theme={theme} />
             </div>
 
             {/* ── SEARCH + FILTERS ── */}
@@ -382,7 +388,7 @@ export default function AdminUsers() {
                     }} />
                     <input
                         type="text"
-                        placeholder="Rechercher par email..."
+                        placeholder={t("admin.searchByEmail")}
                         value={search}
                         onChange={(e) => handleSearch(e.target.value)}
                         onFocus={e => {
@@ -411,9 +417,9 @@ export default function AdminUsers() {
                 {/* Filter pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {["TOUS", "ROLE_ADMIN", "ROLE_VOYAGEUR", "ROLE_USER"].map((role) => {
-                        const active  = filter === role;
+                        const active = filter === role;
                         const hovered = filterHover === role;
-                        const badge   = ROLE_BADGE[mode]?.[role];
+                        const badge = ROLE_BADGE[mode]?.[role];
                         return (
                             <button
                                 key={role}
@@ -433,7 +439,15 @@ export default function AdminUsers() {
                                     letterSpacing: "0.01em",
                                 }}
                             >
-                                {FILTER_LABELS[role] ?? role}
+                                {
+                                    role === "TOUS"
+                                        ? t("admin.all")
+                                        : role === "ROLE_ADMIN"
+                                            ? t("admin.admin")
+                                            : role === "ROLE_VOYAGEUR"
+                                                ? t("admin.traveler")
+                                                : t("admin.user")
+                                }
                             </button>
                         );
                     })}
@@ -453,7 +467,7 @@ export default function AdminUsers() {
                 {loading && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "64px 0", gap: 16 }}>
                         <Spinner color={theme.accent} />
-                        <p style={{ fontSize: 13, color: theme.sub, margin: 0 }}>Chargement des utilisateurs...</p>
+                        <p style={{ fontSize: 13, color: theme.sub, margin: 0 }}>{t("admin.loadingUsers")}</p>
                     </div>
                 )}
 
@@ -469,10 +483,10 @@ export default function AdminUsers() {
                         </div>
                         <div style={{ textAlign: "center" }}>
                             <p style={{ fontSize: 15, fontWeight: 600, color: theme.text, margin: "0 0 5px" }}>
-                                Aucun utilisateur trouvé
+                                {t("admin.noUsersFound")}
                             </p>
                             <p style={{ fontSize: 12, color: theme.sub, margin: 0 }}>
-                                Modifiez vos filtres ou votre recherche
+                                {t("admin.modifyFilters")}
                             </p>
                         </div>
                     </div>
@@ -480,12 +494,18 @@ export default function AdminUsers() {
 
                 {/* Table */}
                 {!loading && filtered.length > 0 && (
-                    <div style={{ overflowX: "auto" }}>
+                    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
                         <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
 
                             <thead>
                                 <tr style={{ background: theadBg, borderBottom: `1px solid ${theme.border}` }}>
-                                    {["ID", "Email", "Rôle", "Statut", "Actions"].map(h => (
+                                    {[
+                                        "ID",
+                                        t("admin.email"),
+                                        t("admin.role"),
+                                        t("admin.status"),
+                                        t("admin.actions")
+                                    ].map(h => (
                                         <th key={h} style={{
                                             padding: "12px 16px",
                                             textAlign: "left",
@@ -558,7 +578,15 @@ export default function AdminUsers() {
                                                 letterSpacing: "0.03em",
                                                 whiteSpace: "nowrap",
                                             }}>
-                                                {u.role?.replace("ROLE_", "") ?? "—"}
+                                                {
+                                                    u.role === "ROLE_ADMIN"
+                                                        ? t("admin.admin")
+                                                        : u.role === "ROLE_VOYAGEUR"
+                                                            ? t("admin.traveler")
+                                                            : u.role === "ROLE_USER"
+                                                                ? t("admin.user")
+                                                                : "—"
+                                                }
                                             </span>
                                         </td>
 
@@ -574,7 +602,7 @@ export default function AdminUsers() {
                                                     fontSize: 11,
                                                     fontWeight: 600,
                                                 }}>
-                                                    Désactivé
+                                                    {t("admin.disabled")}
                                                 </span>
                                             ) : (
                                                 <span style={{
@@ -586,7 +614,7 @@ export default function AdminUsers() {
                                                     fontSize: 11,
                                                     fontWeight: 600,
                                                 }}>
-                                                    Actif
+                                                    {t("admin.active")}
                                                 </span>
                                             )}
                                         </td>
@@ -597,7 +625,7 @@ export default function AdminUsers() {
 
                                                 {u.role !== "ROLE_ADMIN" && (
                                                     <ActionBtn
-                                                        label="Supprimer"
+                                                        label={t("admin.delete")}
                                                         icon={Trash2}
                                                         onClick={() => handleDelete(u.id)}
                                                         disabled={deletingId === u.id}
@@ -609,7 +637,7 @@ export default function AdminUsers() {
 
                                                 {u.role !== "ROLE_ADMIN" && (
                                                     <ActionBtn
-                                                        label="Promouvoir"
+                                                        label={t("admin.promote")}
                                                         icon={ArrowUpCircle}
                                                         onClick={() => handlePromote(u.id)}
                                                         disabled={actionLoading === u.id}
@@ -621,7 +649,7 @@ export default function AdminUsers() {
 
                                                 {u.enabled && (
                                                     <ActionBtn
-                                                        label="Désactiver"
+                                                        label={t("admin.disable")}
                                                         icon={UserX}
                                                         onClick={() => handleDisable(u.id)}
                                                         disabled={actionLoading === u.id}
@@ -633,7 +661,7 @@ export default function AdminUsers() {
 
                                                 {!u.enabled && (
                                                     <ActionBtn
-                                                        label="Activer"
+                                                        label={t("admin.enable")}
                                                         icon={UserCheck}
                                                         onClick={() => handleEnable(u.id)}
                                                         disabled={actionLoading === u.id}

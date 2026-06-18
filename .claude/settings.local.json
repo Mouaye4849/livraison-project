@@ -22,7 +22,14 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\hp\\\\Desktop\\\\livraison-project\" -Recurse -Force)",
       "Bash(Select-Object FullName)",
       "Bash(xargs grep -l \"notificationService.save\\\\|notificationRepository.save\\\\|sendNotification\")",
-      "Bash(mvn compile *)"
+      "Bash(mvn compile *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\hp\\\\Desktop\\\\livraison-project\\\\frontend\\\\src\" -Force)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\hp\\\\Desktop\\\\livraison-project\\\\livraison-backend\" -Recurse -Filter \"*Tracking*\" -ErrorAction SilentlyContinue)",
+      "Bash(xargs grep -l \"tracking\\\\|Tracking\" -i)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\hp\\\\Desktop\\\\livraison-project\\\\livraison-backend\\\\src\\\\main\\\\java\\\\com\\\\livraison\\\\backend\" -Filter \"*Gps*\",\"*TrackingLocation*\" -Recurse)"
     ]
   }
+
+
+  
 }

@@ -15,6 +15,7 @@ import {
     XCircle,
     ArrowRight,
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 // ─── InputField ───────────────────────────────────────────────────────────────
 
@@ -120,6 +121,7 @@ const INITIAL_FORM = {
 };
 
 export default function AddColis() {
+    const { t } = useI18n();
     const navigate = useNavigate();
     const firstInputRef = useRef(null);
 
@@ -140,13 +142,13 @@ export default function AddColis() {
             setLoading(true);
             setMessage(null);
             await api.post("/colis", form);
-            setMessage({ type: "success", text: "Colis créé avec succès ! Redirection..." });
+            setMessage({ type: "success", text: t("createColis.successMsg") });
             setTimeout(() => navigate("/dashboard/my-colis"), 1200);
         } catch (err) {
             console.error(err);
             setMessage({
                 type: "error",
-                text: err.response?.data?.message || "Erreur lors de la création du colis.",
+                text: err.response?.data?.message || t("createColis.errorMsg"),
             });
         } finally {
             setLoading(false);
@@ -164,10 +166,10 @@ export default function AddColis() {
                     <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#1e3a8a]/20 border border-[#1e3a8a]/30">
                         <Package size={18} className="text-[#1e3a8a]" />
                     </div>
-                    <h1 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">Créer un colis</h1>
+                    <h1 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">{t("createColis.title")}</h1>
                 </div>
                 <p className="ml-12 text-sm text-gray-500">
-                    Remplissez les informations pour enregistrer votre envoi.
+                    {t("createColis.subtitle")}
                 </p>
             </div>
 
@@ -184,20 +186,20 @@ export default function AddColis() {
                 className="dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border rounded-2xl p-6 space-y-8 shadow-lg dark:shadow-black/40"
             >
 
-                <FormSection title="Informations du colis" description="Détails de l'envoi">
+                <FormSection title={t("createColis.sectionInfo")} description={t("createColis.sectionInfoDesc")}>
                     <InputField
                         icon={Package}
-                        label="Nom du colis"
+                        label={t("createColis.name")}
                         name="nom"
                         value={form.nom}
                         onChange={handleChange}
-                        placeholder="ex: Vêtements, Électronique…"
+                        placeholder={t("createColis.namePlaceholder")}
                         required
                         ref={firstInputRef}
                     />
                     <InputField
                         icon={Weight}
-                        label="Poids (kg)"
+                        label={t("createColis.weight")}
                         name="poidsKg"
                         type="number"
                         value={form.poidsKg}
@@ -209,7 +211,7 @@ export default function AddColis() {
                     />
                     <InputField
                         icon={Hash}
-                        label="Quantité"
+                        label={t("createColis.quantity")}
                         name="quantite"
                         type="number"
                         value={form.quantite}
@@ -219,7 +221,7 @@ export default function AddColis() {
                     />
                     <InputField
                         icon={DollarSign}
-                        label="Prix proposé (MRU)"
+                        label={t("createColis.price")}
                         name="prixProposeMRU"
                         type="number"
                         value={form.prixProposeMRU}
@@ -231,24 +233,24 @@ export default function AddColis() {
 
                 <div className="dark:border-t dark:border-[#1a1a1a] border-t border-gray-100" />
 
-                <FormSection title="Itinéraire" description="Villes de départ et d'arrivée">
+                <FormSection title={t("createColis.sectionItinerary")} description={t("createColis.sectionItineraryDesc")}>
                     <InputField
                         icon={MapPin}
-                        label="Ville de départ"
+                        label={t("createColis.fromCity")}
                         name="villeDepart"
                         value={form.villeDepart}
                         onChange={handleChange}
-                        placeholder="ex: Nouakchott"
+                        placeholder={t("createColis.fromCityPlaceholder")}
                         required
                     />
                     <div className="relative">
                         <InputField
                             icon={MapPin}
-                            label="Ville d'arrivée"
+                            label={t("createColis.toCity")}
                             name="villeArrivee"
                             value={form.villeArrivee}
                             onChange={handleChange}
-                            placeholder="ex: Nouadhibou"
+                            placeholder={t("createColis.toCityPlaceholder")}
                             required
                         />
                         <ArrowRight
@@ -260,22 +262,22 @@ export default function AddColis() {
 
                 <div className="dark:border-t dark:border-[#1a1a1a] border-t border-gray-100" />
 
-                <FormSection title="Destinataire" description="Informations de contact (optionnel)">
+                <FormSection title={t("createColis.sectionRecipient")} description={t("createColis.sectionRecipientDesc")}>
                     <InputField
                         icon={User}
-                        label="Nom du destinataire"
+                        label={t("createColis.recipientName")}
                         name="nomDestinataire"
                         value={form.nomDestinataire}
                         onChange={handleChange}
-                        placeholder="Nom complet"
+                        placeholder={t("createColis.recipientNamePlaceholder")}
                     />
                     <InputField
                         icon={Phone}
-                        label="Numéro de téléphone"
+                        label={t("createColis.recipientPhone")}
                         name="numDestinataire"
                         value={form.numDestinataire}
                         onChange={handleChange}
-                        placeholder="+222 22 33 45 46"
+                        placeholder={t("createColis.recipientPhonePlaceholder")}
                     />
                 </FormSection>
 
@@ -300,12 +302,12 @@ export default function AddColis() {
                     {loading ? (
                         <>
                             <Loader2 size={16} className="animate-spin" />
-                            Création en cours…
+                            {t("createColis.creating")}
                         </>
                     ) : (
                         <>
                             <Send size={16} />
-                            Créer le colis
+                            {t("createColis.submit")}
                         </>
                     )}
                 </button>

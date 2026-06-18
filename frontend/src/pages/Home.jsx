@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Phone, Mail, ArrowRight, Package, Users, Globe, Zap, ChevronDown, Shield, Star } from "lucide-react";
 import Services from "./Service";
 import Footer from "../components/Footer";
+import { useI18n, LanguageSelector } from "../i18n/index.jsx";
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 const fadeUp = {
@@ -19,36 +20,23 @@ const stagger = {
     visible: { transition: { staggerChildren: 0.1 } },
 };
 
-// ─── Stats Data ───────────────────────────────────────────────────────────────
-const STATS = [
-    { value: "10K+", label: "Livraisons effectuées", icon: Package },
-    { value: "500+", label: "Livreurs actifs", icon: Users },
-    { value: "13", label: "Wilayas couvertes", icon: Globe },
-    { value: "98%", label: "Satisfaction client", icon: Star },
-];
-
-// ─── Features Data ────────────────────────────────────────────────────────────
-const FEATURES = [
-    {
-        icon: Zap,
-        title: "Livraison rapide",
-        desc: "Vos colis livrés en un temps record grâce à notre réseau de voyageurs partout en Mauritanie.",
-    },
-    {
-        icon: Shield,
-        title: "Sécurisé & fiable",
-        desc: "Chaque livraison est tracée et assurée pour une tranquillité d'esprit totale.",
-    },
-    {
-        icon: Globe,
-        title: "Couverture nationale",
-        desc: "De Nouakchott à Zouérate, nous couvrons l'ensemble du territoire mauritanien.",
-    },
-];
-
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Home() {
     const navigate = useNavigate();
+    const { t } = useI18n();
+
+    const STATS = [
+        { value: "10K+", label: t("home.stats.deliveries"), icon: Package },
+        { value: "500+", label: t("home.stats.deliverers"),  icon: Users },
+        { value: "13",   label: t("home.stats.wilayas"),     icon: Globe },
+        { value: "98%",  label: t("home.stats.satisfaction"), icon: Star },
+    ];
+
+    const FEATURES = [
+        { icon: Zap,    title: t("home.features.fast.title"),     desc: t("home.features.fast.desc") },
+        { icon: Shield, title: t("home.features.secure.title"),   desc: t("home.features.secure.desc") },
+        { icon: Globe,  title: t("home.features.national.title"), desc: t("home.features.national.desc") },
+    ];
 
     const scrollToServices = () => {
         const section = document.getElementById("services");
@@ -71,7 +59,7 @@ export default function Home() {
                     </a>
                 </div>
                 <span className="hidden sm:block opacity-70 tracking-widest text-[10px] uppercase">
-                    Mauritanie · Livraison & Logistique
+                    {t("home.tagline")}
                 </span>
             </div>
 
@@ -79,36 +67,35 @@ export default function Home() {
             <nav className="sticky top-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/5 px-6 md:px-12 py-4 flex justify-between items-center">
                 {/* Logo */}
                 <div className="flex items-center gap-4">
-
                     <img
                         src="/logo.png"
                         alt="WASALI"
                         className="w-32 object-contain"
                     />
-
-
                 </div>
 
-
                 {/* Nav Links */}
-                <div className="hidden md:flex gap-8 items-center text-sm font-medium text-white/60">
+                <div className="hidden md:flex gap-6 items-center text-sm font-medium text-white/60">
                     <button className="text-white font-semibold border-b border-red-600 pb-0.5">
-                        Accueil
+                        {t("home.nav.home")}
                     </button>
                     {[
-                        { label: "Devenir Client", action: () => navigate("/register", { state: { role: "CLIENT" } }) },
-                        { label: "Devenir Livreur", action: () => navigate("/register", { state: { role: "VOYAGEUR" } }) },
-                        { label: "Services", action: scrollToServices },
-                    ].map(({ label, action }) => (
+                        { key: "home.nav.becomeClient",    action: () => navigate("/register", { state: { role: "CLIENT" } }) },
+                        { key: "home.nav.becomeDeliverer", action: () => navigate("/register", { state: { role: "VOYAGEUR" } }) },
+                        { key: "home.nav.services",        action: scrollToServices },
+                    ].map(({ key, action }) => (
                         <button
-                            key={label}
+                            key={key}
                             onClick={action}
                             className="relative hover:text-white transition group"
                         >
-                            {label}
+                            {t(key)}
                             <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-red-500 group-hover:w-full transition-all duration-300" />
                         </button>
                     ))}
+
+                    {/* Language selector */}
+                    <LanguageSelector variant="public" />
                 </div>
 
                 {/* CTA */}
@@ -118,7 +105,7 @@ export default function Home() {
                     whileTap={{ scale: 0.97 }}
                     className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg flex items-center gap-2 transition shadow-lg shadow-red-600/20"
                 >
-                    Commencer
+                    {t("home.nav.start")}
                     <ArrowRight size={15} />
                 </motion.button>
             </nav>
@@ -133,7 +120,6 @@ export default function Home() {
                         alt="livraison"
                         className="w-full h-full object-cover opacity-20"
                     />
-                    {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/60 via-[#0a0a0a]/40 to-[#0a0a0a]" />
                 </div>
 
@@ -151,7 +137,7 @@ export default function Home() {
                     {/* Badge */}
                     <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-white/70 mb-8 backdrop-blur-sm">
                         <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                        Plateforme # de livraison en Mauritanie
+                        {t("home.hero.badge")}
                     </motion.div>
 
                     {/* Headline */}
@@ -161,11 +147,11 @@ export default function Home() {
                         className="text-5xl md:text-7xl font-black leading-[1.08] tracking-tight mb-6"
                         style={{ fontFamily: "'Sora', 'Manrope', sans-serif" }}
                     >
-                        Wasali connecte
+                        {t("home.hero.title1")}
                         <br />
-                        <span className="text-red-500">la Mauritanie</span>
+                        <span className="text-red-500">{t("home.hero.title2")}</span>
                         <br />
-                        au monde
+                        {t("home.hero.title3")}
                     </motion.h1>
 
                     {/* Subtitle */}
@@ -174,7 +160,7 @@ export default function Home() {
                         custom={2}
                         className="text-white/50 text-lg md:text-xl max-w-xl mx-auto mb-12 leading-relaxed"
                     >
-                        Connectez clients et livreurs facilement, rapidement et en toute sécurité — partout en Mauritanie.
+                        {t("home.hero.subtitle")}
                     </motion.p>
 
                     {/* CTA Buttons */}
@@ -186,7 +172,7 @@ export default function Home() {
                             className="bg-red-600 text-white font-bold px-8 py-4 rounded-xl text-base flex items-center gap-3 shadow-xl shadow-red-700/30 transition-all"
                         >
                             <Package size={18} />
-                            Espace Client
+                            {t("home.hero.clientSpace")}
                             <ArrowRight size={16} />
                         </motion.button>
 
@@ -196,7 +182,7 @@ export default function Home() {
                             whileTap={{ scale: 0.97 }}
                             className="border border-white/15 bg-white/5 backdrop-blur-sm text-white font-semibold px-8 py-4 rounded-xl text-base flex items-center gap-3 hover:bg-white/10 hover:border-white/25 transition-all"
                         >
-                            Espace Admin
+                            {t("home.hero.adminSpace")}
                         </motion.button>
                     </motion.div>
                 </motion.div>
@@ -209,7 +195,7 @@ export default function Home() {
                     transition={{ delay: 1.5 }}
                     className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/30 hover:text-white/60 transition"
                 >
-                    <span className="text-[10px] uppercase tracking-widest">Découvrir</span>
+                    <span className="text-[10px] uppercase tracking-widest">{t("home.hero.discover")}</span>
                     <motion.div animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.8 }}>
                         <ChevronDown size={16} />
                     </motion.div>
@@ -252,9 +238,11 @@ export default function Home() {
                     className="max-w-5xl mx-auto"
                 >
                     <motion.div variants={fadeUp} className="text-center mb-16">
-                        <span className="text-red-500 text-xs font-bold uppercase tracking-widest">Pourquoi Wasali ?</span>
+                        <span className="text-red-500 text-xs font-bold uppercase tracking-widest">
+                            {t("home.why")}
+                        </span>
                         <h2 className="text-3xl md:text-4xl font-black mt-3 text-white">
-                            La livraison, réinventée
+                            {t("home.whyTitle")}
                         </h2>
                     </motion.div>
 

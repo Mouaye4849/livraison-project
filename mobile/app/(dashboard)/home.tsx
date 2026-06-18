@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { authService } from '@/services/auth.service';
 import { colisService } from '@/services/colis.service';
 import { notificationService } from '@/services/notification.service';
+import { API_BASE_URL } from '@/constants/config';
 import type { StoredUser, Colis } from '@/types';
 
 const { width } = Dimensions.get('window');
@@ -25,30 +26,32 @@ const CARD_W = (width - 52) / 2; // (screen - 2*pad - gap) / 2
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:      '#0a0a0a',
-  card:    '#141414',
-  card2:   '#1c1c1c',
-  bd:      'rgba(255,255,255,0.07)',
-  bd2:     'rgba(255,255,255,0.04)',
-  red:     '#dc2626',
-  redDim:  'rgba(220,38,38,0.12)',
-  redSoft: 'rgba(220,38,38,0.08)',
-  wh:      '#ffffff',
-  gr:      '#9ca3af',
-  dim:     '#4b5563',
-  dim2:    '#374151',
+  bg:      '#eef1ee',
+  card:    '#ffffff',
+  card2:   '#f5f8f5',
+  bd:      'rgba(0,0,0,0.08)',
+  bd2:     'rgba(0,0,0,0.04)',
   grn:     '#22c55e',
+  grnDk:   '#166534',
   grnDim:  'rgba(34,197,94,0.12)',
-  ylw:     '#facc15',
-  ylwDim:  'rgba(250,204,21,0.12)',
-  blu:     '#3b82f6',
-  bluDim:  'rgba(59,130,246,0.12)',
-  pur:     '#a855f7',
-  purDim:  'rgba(168,85,247,0.12)',
+  grnBd:   'rgba(34,197,94,0.25)',
+  wh:      '#1a2e1a',
+  gr:      '#6b7280',
+  dim:     '#9ca3af',
+  dim2:    '#d1d5db',
+  red:     '#dc2626',
+  redDim:  'rgba(220,38,38,0.10)',
+  redSoft: 'rgba(220,38,38,0.07)',
+  ylw:     '#d97706',
+  ylwDim:  'rgba(217,119,6,0.10)',
+  blu:     '#2563eb',
+  bluDim:  'rgba(37,99,235,0.10)',
+  pur:     '#7c3aed',
+  purDim:  'rgba(124,58,237,0.10)',
 } as const;
 
 const STATUT_CFG: Record<string, { label: string; color: string; bg: string }> = {
-  BROUILLON: { label: 'Brouillon', color: C.gr,  bg: 'rgba(156,163,175,0.10)' },
+  BROUILLON: { label: 'Brouillon', color: C.gr,  bg: 'rgba(139,148,158,0.10)' },
   PUBLIE:    { label: 'Publié',    color: C.blu,  bg: C.bluDim },
   ACCEPTE:   { label: 'Accepté',  color: C.ylw,  bg: C.ylwDim },
   EN_COURS:  { label: 'En cours', color: C.red,   bg: C.redDim },
@@ -61,8 +64,8 @@ const STATUT_CFG: Record<string, { label: string; color: string; bg: string }> =
 const SERVICES = [
   {
     icon:  'cube',
-    color: C.red,
-    bg:    C.redDim,
+    color: C.grn,
+    bg:    C.grnDim,
     title: 'Mes Colis',
     sub:   'Gérer vos envois',
     route: '/(dashboard)/colis',
@@ -85,8 +88,8 @@ const SERVICES = [
   },
   {
     icon:  'chatbubble',
-    color: C.grn,
-    bg:    C.grnDim,
+    color: C.pur,
+    bg:    C.purDim,
     title: 'Messages',
     sub:   'Vos conversations',
     route: '/(dashboard)/messages',
@@ -95,9 +98,9 @@ const SERVICES = [
 
 // ─── Category strip data ──────────────────────────────────────────────────────
 const CATEGORIES = [
-  { icon: 'cube-outline',      label: 'Colis',    color: C.red,  bg: C.redDim,  route: '/(dashboard)/colis'    },
+  { icon: 'cube-outline',      label: 'Colis',    color: C.grn,  bg: C.grnDim,  route: '/(dashboard)/colis'    },
   { icon: 'airplane-outline',  label: 'Voyages',  color: C.blu,  bg: C.bluDim,  route: '/(dashboard)/voyages'  },
-  { icon: 'chatbubble-outline',label: 'Messages', color: C.grn,  bg: C.grnDim,  route: '/(dashboard)/messages' },
+  { icon: 'chatbubble-outline',label: 'Messages', color: C.pur,  bg: C.purDim,  route: '/(dashboard)/messages' },
   { icon: 'person-outline',    label: 'Profil',   color: C.ylw,  bg: C.ylwDim,  route: '/(dashboard)/profile'  },
 ] as const;
 
@@ -163,15 +166,15 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={[S.root, { alignItems: 'center', justifyContent: 'center' }]}>
-        <StatusBar style="light" />
-        <ActivityIndicator color={C.red} size="large" />
+        <StatusBar style="dark" />
+        <ActivityIndicator color={C.grn} size="large" />
       </View>
     );
   }
 
   return (
     <View style={S.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <SafeAreaView style={S.safe} edges={['top']}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -180,8 +183,8 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refresh}
               onRefresh={() => load(true)}
-              tintColor={C.red}
-              colors={[C.red]}
+              tintColor={C.grn}
+              colors={[C.grn]}
             />
           }
         >
@@ -227,7 +230,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={S.adminCard}
               activeOpacity={0.82}
-              onPress={() => Linking.openURL('http://192.168.43.37:5173/m-admin/login')}
+              onPress={() => Linking.openURL(API_BASE_URL.replace(/\/api$/, '/m-admin/login'))}
             >
               <View style={S.adminIconWrap}>
                 <Ionicons name="shield-checkmark" size={20} color={C.blu} />
@@ -249,7 +252,7 @@ export default function HomeScreen() {
             onPress={() => router.navigate('/(dashboard)/colis' as any)}
           >
             <View style={S.summaryIconWrap}>
-              <Ionicons name="cube" size={22} color={C.red} />
+              <Ionicons name="cube" size={22} color={C.grn} />
             </View>
             <View style={S.summaryBody}>
               <Text style={S.summaryLabel}>Livraisons actives</Text>
@@ -307,7 +310,7 @@ export default function HomeScreen() {
                 <Text style={S.ctaTitle}>Publier un voyage</Text>
                 <Text style={S.ctaSub}>Proposer de transporter des colis</Text>
               </View>
-              <Ionicons name="arrow-forward-circle" size={26} color="rgba(255,255,255,0.55)" />
+              <Ionicons name="arrow-forward-circle" size={26} color="rgba(15,20,25,0.45)" />
           </TouchableOpacity>
 
           {/* ── CATEGORIES SECTION ──────────────────────────── */}
@@ -412,13 +415,13 @@ const S = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: C.redDim,
+    backgroundColor: C.grnDim,
     borderWidth: 2,
-    borderColor: C.red,
+    borderColor: C.grn,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarTxt: { color: C.red, fontSize: 15, fontWeight: '800' },
+  avatarTxt: { color: C.grn, fontSize: 15, fontWeight: '800' },
   greeting:  { color: C.gr,  fontSize: 12, fontWeight: '500', marginBottom: 1 },
   userName:  { color: C.wh,  fontSize: 16, fontWeight: '700', maxWidth: width * 0.45 },
   iconBtn: {
@@ -438,7 +441,7 @@ const S = StyleSheet.create({
     minWidth: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderWidth: 1.5,
     borderColor: C.bg,
     alignItems: 'center',
@@ -509,7 +512,7 @@ const S = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: C.redDim,
+    backgroundColor: C.grnDim,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -527,7 +530,7 @@ const S = StyleSheet.create({
     marginBottom: 14,
   },
   sectionTitle: { color: C.wh, fontSize: 17, fontWeight: '700' },
-  seeAllLink:   { color: C.red, fontSize: 13, fontWeight: '600' },
+  seeAllLink:   { color: C.grn, fontSize: 13, fontWeight: '600' },
 
   // ── Service grid
   serviceGrid: {
@@ -642,14 +645,14 @@ const S = StyleSheet.create({
     gap: 10,
   },
   emptyTxt:    { color: C.gr, fontSize: 14, fontWeight: '500' },
-  emptyBtn:    { marginTop: 4, backgroundColor: C.redDim, borderRadius: 11, paddingHorizontal: 18, paddingVertical: 10 },
-  emptyBtnTxt: { color: C.red, fontSize: 13, fontWeight: '700' },
+  emptyBtn:    { marginTop: 4, backgroundColor: C.grnDim, borderRadius: 11, paddingHorizontal: 18, paddingVertical: 10 },
+  emptyBtnTxt: { color: C.grn, fontSize: 13, fontWeight: '700' },
 
   // ── Voyageur CTA
   ctaCard: {
     marginHorizontal: 20,
     marginBottom: 20,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 18,
     flexDirection: 'row',
     alignItems: 'center',
@@ -657,7 +660,7 @@ const S = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 16,
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.40, shadowRadius: 14 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.50, shadowRadius: 14 },
       android: { elevation: 8 },
     }),
   },
@@ -665,11 +668,11 @@ const S = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 13,
-    backgroundColor: 'rgba(255,255,255,0.20)',
+    backgroundColor: 'rgba(15,20,25,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   ctaBody:  { flex: 1 },
-  ctaTitle: { color: '#ffffff', fontSize: 15, fontWeight: '800' },
-  ctaSub:   { color: 'rgba(255,255,255,0.70)', fontSize: 12, marginTop: 2 },
+  ctaTitle: { color: '#0f1419', fontSize: 15, fontWeight: '800' },
+  ctaSub:   { color: 'rgba(15,20,25,0.65)', fontSize: 12, marginTop: 2 },
 });

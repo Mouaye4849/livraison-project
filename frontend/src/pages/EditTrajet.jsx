@@ -9,8 +9,10 @@ import {
     ArrowLeft,
     Loader2
 } from "lucide-react";
+import { useI18n } from "../i18n/index.jsx";
 
 export default function EditTrajet() {
+    const { t } = useI18n();
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -37,7 +39,7 @@ export default function EditTrajet() {
                 setForm(data);
             } catch (err) {
                 console.error(err);
-                setMessage("Erreur chargement ❌");
+                setMessage(t("editTrajet.loadError"));
             } finally {
                 setLoading(false);
             }
@@ -57,11 +59,11 @@ export default function EditTrajet() {
             setSaving(true);
             setMessage(null);
             await api.put(`/trajets/${id}`, form);
-            setMessage("Trajet mis à jour avec succès ✅");
+            setMessage(t("editTrajet.updateSuccess"));
             setTimeout(() => navigate("/dashboard/trajets"), 1200);
         } catch (err) {
             console.error(err);
-            setMessage("Erreur lors de la mise à jour ❌");
+            setMessage(t("editTrajet.updateError"));
         } finally {
             setSaving(false);
         }
@@ -93,7 +95,7 @@ export default function EditTrajet() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 size={28} className="animate-spin text-[#1e3a8a]" />
-                <p className="text-gray-500 text-sm">Chargement du trajet...</p>
+                <p className="text-gray-500 text-sm">{t("editTrajet.loading")}</p>
             </div>
         );
     }
@@ -109,7 +111,7 @@ export default function EditTrajet() {
                 className="inline-flex items-center gap-2 dark:bg-[#111111] bg-white dark:border-[#1f1f1f] border-gray-200 border dark:hover:bg-[#161616] hover:bg-gray-50 dark:hover:border-[#2a2a2a] hover:border-gray-300 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 text-sm px-4 py-2 rounded-xl transition-all duration-200"
             >
                 <ArrowLeft size={15} />
-                Retour
+                {t("editTrajet.back")}
             </button>
 
             {/* HEADER */}
@@ -119,10 +121,10 @@ export default function EditTrajet() {
                 </div>
                 <div>
                     <h2 className="text-xl font-bold dark:text-white text-gray-900 tracking-tight">
-                        Modifier le trajet
+                        {t("editTrajet.title")}
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        Mettez à jour les informations de votre trajet
+                        {t("editTrajet.subtitle")}
                     </p>
                 </div>
             </div>
@@ -149,7 +151,7 @@ export default function EditTrajet() {
 
                     {/* ROUTE */}
                     <div className="space-y-4">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Itinéraire</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{t("editTrajet.itinerary")}</p>
 
                         <Input
                             icon={MapPin}
@@ -157,7 +159,7 @@ export default function EditTrajet() {
                             name="origine"
                             value={form.origine}
                             onChange={handleChange}
-                            placeholder="Ville de départ"
+                            placeholder={t("editTrajet.fromCityPlaceholder")}
                             required
                         />
 
@@ -167,7 +169,7 @@ export default function EditTrajet() {
                             name="destination"
                             value={form.destination}
                             onChange={handleChange}
-                            placeholder="Ville d'arrivée"
+                            placeholder={t("editTrajet.toCityPlaceholder")}
                             required
                         />
                     </div>
@@ -177,7 +179,7 @@ export default function EditTrajet() {
 
                     {/* DETAILS */}
                     <div className="space-y-4">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Détails</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{t("editTrajet.details")}</p>
 
                         <Input
                             icon={Calendar}
@@ -194,7 +196,7 @@ export default function EditTrajet() {
                             name="capaciteKg"
                             value={form.capaciteKg}
                             onChange={handleChange}
-                            placeholder="Capacité en kg"
+                            placeholder={t("editTrajet.capacityPlaceholder")}
                             required
                         />
                     </div>
@@ -217,7 +219,7 @@ export default function EditTrajet() {
                         ) : (
                             <Save size={16} />
                         )}
-                        {saving ? "Enregistrement..." : "Mettre à jour"}
+                        {saving ? t("editTrajet.saving") : t("editTrajet.update")}
                     </button>
 
                 </form>

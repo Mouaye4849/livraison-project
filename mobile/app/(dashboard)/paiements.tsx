@@ -18,21 +18,21 @@ import type { Paiement, StatutPaiement } from '@/types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:     '#0a0a0a',
-  card:   '#141414',
-  bd:     'rgba(255,255,255,0.07)',
-  bd2:    'rgba(255,255,255,0.04)',
+  bg:     '#eef1ee',
+  card:   '#ffffff',
+  bd:     'rgba(0,0,0,0.08)',
+  bd2:    'rgba(0,0,0,0.04)',
   red:    '#dc2626',
-  redDim: 'rgba(220,38,38,0.12)',
-  wh:     '#ffffff',
-  gr:     '#9ca3af',
-  dim:    '#4b5563',
+  redDim: 'rgba(220,38,38,0.10)',
+  wh:     '#1a2e1a',
+  gr:     '#6b7280',
+  dim:    '#9ca3af',
   grn:    '#22c55e',
-  grnDim: 'rgba(34,197,94,0.13)',
-  ylw:    '#facc15',
-  ylwDim: 'rgba(250,204,21,0.13)',
-  blu:    '#3b82f6',
-  bluDim: 'rgba(59,130,246,0.13)',
+  grnDim: 'rgba(34,197,94,0.12)',
+  ylw:    '#d97706',
+  ylwDim: 'rgba(217,119,6,0.10)',
+  blu:    '#2563eb',
+  bluDim: 'rgba(37,99,235,0.10)',
 } as const;
 
 const STATUT_CFG: Record<StatutPaiement, { label: string; color: string; bg: string; icon: string }> = {
@@ -93,15 +93,15 @@ export default function PaiementsScreen() {
   if (loading) {
     return (
       <View style={[S.root, { alignItems: 'center', justifyContent: 'center' }]}>
-        <StatusBar style="light" />
-        <ActivityIndicator color={C.red} size="large" />
+        <StatusBar style="dark" />
+        <ActivityIndicator color={C.grn} size="large" />
       </View>
     );
   }
 
   return (
     <View style={S.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <SafeAreaView style={S.safe} edges={['top']}>
 
         {/* ── HEADER ──────────────────────────────────────── */}
@@ -134,8 +134,8 @@ export default function PaiementsScreen() {
             <RefreshControl
               refreshing={refresh}
               onRefresh={() => load(true)}
-              tintColor={C.red}
-              colors={[C.red]}
+              tintColor={C.grn}
+              colors={[C.grn]}
             />
           }
           ListEmptyComponent={

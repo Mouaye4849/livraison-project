@@ -32,18 +32,22 @@ const { width } = Dimensions.get('window');
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:          '#09080b',
-  surface:     '#130f16',
-  card:        '#1b1420',
-  border:      'rgba(255,255,255,0.07)',
-  borderFocus: 'rgba(220,38,38,0.50)',
-  sep:         'rgba(255,255,255,0.05)',
+  bg:          '#eef1ee',
+  surface:     '#ffffff',
+  card:        '#f0f4f0',
+  border:      'rgba(0,0,0,0.08)',
+  borderFocus: 'rgba(34,197,94,0.50)',
+  sep:         'rgba(0,0,0,0.04)',
+  grn:         '#22c55e',
+  grnDk:       '#166534',
+  grnDim:      'rgba(34,197,94,0.12)',
+  grnBd:       'rgba(34,197,94,0.25)',
   red:         '#dc2626',
-  redDim:      'rgba(220,38,38,0.12)',
-  redBorder:   'rgba(220,38,38,0.32)',
-  white:       '#ffffff',
-  gray:        '#9ca3af',
-  dim:         '#5a5a5a',
+  redDim:      'rgba(220,38,38,0.10)',
+  redBorder:   'rgba(220,38,38,0.30)',
+  white:       '#1a2e1a',
+  gray:        '#6b7280',
+  dim:         '#9ca3af',
   check:       '#22c55e',
 } as const;
 
@@ -147,7 +151,7 @@ function RoleCard({ role, selected, onSelect, icon, label, desc }: RoleCardProps
       >
         {/* Selection indicator */}
         <View style={[ST.roleCheck, active && ST.roleCheckActive]}>
-          {active && <Ionicons name="checkmark" size={11} color={C.white} />}
+          {active && <Ionicons name="checkmark" size={11} color="#0f1419" />}
         </View>
 
         {/* Icon area */}
@@ -155,7 +159,7 @@ function RoleCard({ role, selected, onSelect, icon, label, desc }: RoleCardProps
           <MaterialCommunityIcons
             name={icon as any}
             size={28}
-            color={active ? C.red : C.dim}
+            color={active ? C.grn : C.dim}
           />
         </View>
 
@@ -195,7 +199,7 @@ function FieldRow({
         <Ionicons
           name={icon}
           size={17}
-          color={focused ? C.red : C.dim}
+          color={focused ? C.grn : C.dim}
           style={{ marginRight: 12 }}
         />
         <TextInput
@@ -281,8 +285,8 @@ export default function RegisterScreen() {
 
         {/* ── Background blobs ────────────────────────── */}
         <View style={[ST.blob, { top: -80, left: -80, width: 320, height: 320, borderRadius: 160, backgroundColor: 'rgba(100,10,120,0.09)' }]} />
-        <View style={[ST.blob, { bottom: -60, right: -60, width: 280, height: 280, borderRadius: 140, backgroundColor: 'rgba(180,15,15,0.10)' }]} />
-        <View style={[ST.blob, { top: '40%', right: -20, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(220,38,38,0.05)' }]} />
+        <View style={[ST.blob, { bottom: -60, right: -60, width: 280, height: 280, borderRadius: 140, backgroundColor: 'rgba(22,101,52,0.18)' }]} />
+        <View style={[ST.blob, { top: '40%', right: -20, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(74,222,128,0.04)' }]} />
 
         <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
           <KeyboardAvoidingView
@@ -328,7 +332,7 @@ export default function RegisterScreen() {
               <FadeUp delay={80}>
                 <View style={ST.tagline}>
                   <Text style={ST.taglineText}>
-                    Rejoignez <Text style={{ color: C.red }}>+10 000</Text> utilisateurs en Mauritanie
+                    Rejoignez <Text style={{ color: C.grn }}>+10 000</Text> utilisateurs en Mauritanie
                   </Text>
                 </View>
               </FadeUp>
@@ -451,11 +455,11 @@ export default function RegisterScreen() {
                     activeOpacity={1}
                   >
                     {loading ? (
-                      <ActivityIndicator color={C.white} size="small" />
+                      <ActivityIndicator color="#0f1419" size="small" />
                     ) : (
                       <>
                         <Text style={ST.btnTxt}>Créer mon compte</Text>
-                        <Ionicons name="checkmark-circle-outline" size={20} color={C.white} />
+                        <Ionicons name="checkmark-circle-outline" size={20} color="#0f1419" />
                       </>
                     )}
                   </TouchableOpacity>
@@ -468,7 +472,7 @@ export default function RegisterScreen() {
                   <View style={ST.roleBadgeDot} />
                   <Text style={ST.roleBadgeText}>
                     Inscription en tant que{' '}
-                    <Text style={{ color: C.red, fontWeight: '700' }}>
+                    <Text style={{ color: C.grn, fontWeight: '700' }}>
                       {role === 'CLIENT' ? 'Client' : 'Voyageur'}
                     </Text>
                   </Text>
@@ -547,7 +551,7 @@ const ST = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
   },
   brandName: {
     color: C.dim,
@@ -567,7 +571,7 @@ const ST = StyleSheet.create({
     backgroundColor: C.border,
   },
   stepActive: {
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     width: 28,
   },
 
@@ -625,10 +629,10 @@ const ST = StyleSheet.create({
     }),
   },
   roleCardActive: {
-    borderColor: C.red,
-    backgroundColor: 'rgba(220,38,38,0.08)',
+    borderColor: C.grn,
+    backgroundColor: 'rgba(74,222,128,0.08)',
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.20, shadowRadius: 12 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 12 },
       android: { elevation: 5 },
     }),
   },
@@ -645,14 +649,14 @@ const ST = StyleSheet.create({
     justifyContent: 'center',
   },
   roleCheckActive: {
-    backgroundColor: C.red,
-    borderColor: C.red,
+    backgroundColor: C.grn,
+    borderColor: C.grn,
   },
   roleIconWrap: {
     width: 52,
     height: 52,
     borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
     borderWidth: 1,
     borderColor: C.border,
     alignItems: 'center',
@@ -660,8 +664,8 @@ const ST = StyleSheet.create({
     marginBottom: 4,
   },
   roleIconWrapActive: {
-    backgroundColor: C.redDim,
-    borderColor: C.redBorder,
+    backgroundColor: C.grnDim,
+    borderColor: C.grnBd,
   },
   roleLabel: {
     color: C.gray,
@@ -697,7 +701,7 @@ const ST = StyleSheet.create({
     height: 54,
   },
   fieldRowFocused: {
-    backgroundColor: 'rgba(220,38,38,0.04)',
+    backgroundColor: 'rgba(74,222,128,0.04)',
   },
   fieldSep: {
     height: 1,
@@ -752,7 +756,7 @@ const ST = StyleSheet.create({
     marginBottom: 12,
   },
   btn: {
-    backgroundColor: C.red,
+    backgroundColor: C.grn,
     borderRadius: 16,
     height: 58,
     flexDirection: 'row',
@@ -760,12 +764,12 @@ const ST = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     ...Platform.select({
-      ios:     { shadowColor: C.red, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.45, shadowRadius: 18 },
+      ios:     { shadowColor: C.grnDk, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.55, shadowRadius: 18 },
       android: { elevation: 10 },
     }),
   },
   btnTxt: {
-    color: C.white,
+    color: '#0f1419',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.2,
@@ -802,7 +806,7 @@ const ST = StyleSheet.create({
     fontSize: 14,
   },
   footerLink: {
-    color: C.red,
+    color: C.grn,
     fontSize: 14,
     fontWeight: '700',
   },
