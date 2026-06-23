@@ -256,12 +256,10 @@ export default function RegisterScreen() {
         email:    email.trim().toLowerCase(),
         password,
       };
-      if (role === 'CLIENT') {
-        await authService.registerClient(payload);
-      } else {
-        await authService.registerVoyageur(payload);
-      }
-      router.replace({ pathname: '/login', params: { registered: '1' } } as any);
+      const response = role === 'CLIENT'
+        ? await authService.registerWebClient(payload)
+        : await authService.registerWebVoyageur(payload);
+      router.replace({ pathname: '/verify-otp', params: { email: response.email } } as any);
     } catch (err) {
       const axiosErr = err as AxiosError<ApiError>;
       const msg =

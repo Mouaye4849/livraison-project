@@ -21,14 +21,19 @@ export default function RegisterPage() {
     const handleGoogleSignup = async () => {
         try {
             const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const googleData = { name: user.displayName, email: user.email, googleId: user.uid };
+            const firebaseUser = result.user;
+            const googleData = { name: firebaseUser.displayName, email: firebaseUser.email, googleId: firebaseUser.uid };
             const res = await api.post("/auth/google", googleData);
-            localStorage.setItem("token", res.data.token);
-            localStorage.setItem("user", JSON.stringify({ role: res.data.role }));
-            navigate("/dashboard");
+            const data = res.data;
+
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify({ email: data.email, role: data.role }));
+            localStorage.setItem("role", data.role);
+
+            navigate(data.role === "ROLE_ADMIN" ? "/admin/dashboard" : "/dashboard");
         } catch (err) {
             console.error(err);
+            setError(err.response?.data?.message || t("register.googleFailed") || "Erreur connexion Google");
         }
     };
 
@@ -42,9 +47,11 @@ export default function RegisterPage() {
 
         try {
             setLoading(true);
-            const endpoint = role === "VOYAGEUR" ? "/auth/register/voyageur" : "/auth/register/client";
+            const endpoint = role === "VOYAGEUR"
+                ? "/auth/register/web/voyageur"
+                : "/auth/register/web/client";
             await api.post(endpoint, { name, email, password });
-            navigate("/login", { state: { role } });
+            navigate("/verify-otp", { state: { email, role } });
         } catch (err) {
             setError(err.response?.data?.message || t("register.failed"));
         } finally {

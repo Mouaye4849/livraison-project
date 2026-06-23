@@ -47,11 +47,13 @@ export default function LoginPage() {
 
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        t("login.wrongCreds")
-      );
+      const msg = err.response?.data?.message || err.message || "";
+      if (msg.startsWith("EMAIL_NOT_VERIFIED:")) {
+        const unverifiedEmail = msg.split(":")[1];
+        navigate("/verify-otp", { state: { email: unverifiedEmail } });
+        return;
+      }
+      setError(msg || t("login.wrongCreds"));
     } finally {
       setLoading(false);
     }

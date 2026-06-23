@@ -4,17 +4,17 @@ import NotificationBell from "../components/NotificationBell";
 import {
     LayoutDashboard, Package, PlusCircle, Globe, Truck, Link,
     CreditCard, Layers, Route, ChevronLeft, ChevronRight, Search,
-    LogOut, Settings, ChevronDown, MessageCircle, Sun, Moon, Menu,
+    LogOut, Settings, ChevronDown, MessageCircle, Sun, Moon,
 } from "lucide-react";
 import { useI18n, LanguageSelector } from "../i18n/index.jsx";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { getToken } from "../utils/auth";
+import { getUserRole } from "../utils/jwt";
 
 function getUserEmail() {
     try {
         const u = localStorage.getItem("user");
         if (u) return JSON.parse(u).email ?? "";
-    } catch {}
+    } catch { }
     return localStorage.getItem("email") ?? "";
 }
 
@@ -25,80 +25,138 @@ function getInitials(email) {
 
 // ─── Nav config (function so it uses translated labels) ───────────────────────
 
-function getNavSections(t) {
-    return [
+function getNavSections(t, role) {
+
+    const sections = [
         {
             key: "overview",
             label: t("layout.sections.overview"),
             items: [
-                { path: "/dashboard",                   icon: LayoutDashboard, label: t("layout.nav.dashboard")         },
-            ],
-        },
-        {
-            key: "colis",
-            label: t("layout.sections.colis"),
-            items: [
-                { path: "/dashboard/my-colis",           icon: Package,         label: t("layout.nav.myColis")           },
-                { path: "/dashboard/colis/create",        icon: PlusCircle,      label: t("layout.nav.createColis")      },
-                { path: "/dashboard/colis/public",        icon: Globe,           label: t("layout.nav.publicColis")      },
-            ],
-        },
-        {
-            key: "trajets",
-            label: t("layout.sections.trajets"),
-            items: [
-                { path: "/dashboard/trajets",             icon: Truck,           label: t("layout.nav.myTrajets")        },
-                { path: "/dashboard/trajets/create",      icon: Route,           label: t("layout.nav.createTrajet")    },
-                { path: "/dashboard/trajets/with-colis",  icon: Layers,          label: t("layout.nav.trajetsWithColis") },
-            ],
-        },
-        {
-            key: "management",
-            label: t("layout.sections.management"),
-            items: [
-                { path: "/dashboard/assign",              icon: Link,            label: t("layout.nav.assignColis")     },
-                { path: "/dashboard/payments",            icon: CreditCard,      label: t("layout.nav.payments")        },
-            ],
-        },
-        {
-            key: "communication",
-            label: t("layout.sections.communication"),
-            items: [
-                { path: "/dashboard/messages",            icon: MessageCircle,   label: t("layout.nav.messages")        },
+                {
+                    path: "/dashboard",
+                    icon: LayoutDashboard,
+                    label: t("layout.nav.dashboard")
+                },
             ],
         },
     ];
+
+    // USER
+    if (role === "ROLE_USER") {
+
+        sections.push({
+            key: "colis",
+            label: t("layout.sections.colis"),
+            items: [
+                {
+                    path: "/dashboard/my-colis",
+                    icon: Package,
+                    label: t("layout.nav.myColis")
+                },
+                {
+                    path: "/dashboard/colis/create",
+                    icon: PlusCircle,
+                    label: t("layout.nav.createColis")
+                },
+
+            ],
+        });
+
+        sections.push({
+            key: "management",
+            label: t("layout.sections.management"),
+            items: [
+                {
+                    path: "/dashboard/payments",
+                    icon: CreditCard,
+                    label: t("layout.nav.payments")
+                },
+            ],
+        });
+    }
+
+    // VOYAGEUR
+    if (role === "ROLE_VOYAGEUR") {
+
+        sections.push({
+            key: "trajets",
+            label: t("layout.sections.trajets"),
+            items: [
+                {
+                    path: "/dashboard/trajets",
+                    icon: Truck,
+                    label: t("layout.nav.myTrajets")
+                },
+                {
+                    path: "/dashboard/trajets/create",
+                    icon: Route,
+                    label: t("layout.nav.createTrajet")
+                },
+                {
+                    path: "/dashboard/trajets/with-colis",
+                    icon: Layers,
+                    label: t("layout.nav.trajetsWithColis")
+                },
+                {
+                    path: "/dashboard/colis/public",
+                    icon: Globe,
+                    label: t("layout.nav.publicColis")
+                },
+            ],
+        });
+
+        sections.push({
+            key: "management",
+            label: t("layout.sections.management"),
+            items: [
+                {
+                    path: "/dashboard/assign",
+                    icon: Link,
+                    label: t("layout.nav.assignColis")
+                },
+                {
+                    path: "/dashboard/payments",
+                    icon: CreditCard,
+                    label: t("layout.nav.payments")
+                },
+            ],
+        });
+    }
+
+    sections.push({
+        key: "communication",
+        label: t("layout.sections.communication"),
+        items: [
+            {
+                path: "/dashboard/messages",
+                icon: MessageCircle,
+                label: t("layout.nav.messages")
+            },
+        ],
+    });
+
+    return sections;
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
-    const navigate  = useNavigate();
-    const location  = useLocation();
-    const { t }     = useI18n();
-    const isActive  = (path) => location.pathname === path;
-    const sections  = getNavSections(t);
+function Sidebar({ collapsed, onToggle, role }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { t } = useI18n();
+    const isActive = (path) => location.pathname === path;
+    const sections = getNavSections(t, role);
 
     return (
-        <>
-            {/* Mobile backdrop — closes drawer on tap outside */}
-            {mobileOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-black/60 md:hidden"
-                    onClick={onMobileClose}
-                />
-            )}
-            <aside
-                className={`
-                    fixed md:relative top-0 left-0 z-50 md:z-auto
-                    w-[234px] ${collapsed ? "md:w-[66px]" : "md:w-[234px]"}
-                    flex flex-col h-screen shrink-0
-                    transition-all duration-300 ease-in-out
-                    dark:bg-[#080808] bg-white
-                    dark:border-e dark:border-white/[0.05] border-e border-gray-100
-                    ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-                `}
-            >
+        <aside
+            style={{ width: collapsed ? "66px" : "234px" }}
+            className="
+                relative flex flex-col h-screen shrink-0
+                transition-all duration-300 ease-in-out
+                dark:bg-[#080808] bg-white
+                dark:border-e dark:border-white/[0.05] border-e border-gray-100
+            "
+        >
             {/* ── Logo ── */}
             <div className="
                 flex items-center gap-3 px-3.5 h-[60px] overflow-hidden
@@ -158,11 +216,10 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
 
                                         <Icon
                                             size={16}
-                                            className={`shrink-0 transition-all duration-150 ${
-                                                active
-                                                    ? "dark:text-red-400 text-red-500"
-                                                    : "dark:text-gray-600 text-gray-400 group-hover:scale-110"
-                                            }`}
+                                            className={`shrink-0 transition-all duration-150 ${active
+                                                ? "dark:text-red-400 text-red-500"
+                                                : "dark:text-gray-600 text-gray-400 group-hover:scale-110"
+                                                }`}
                                         />
 
                                         {!collapsed && (
@@ -208,8 +265,7 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
                     {collapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
                 </button>
             </div>
-            </aside>
-        </>
+        </aside>
     );
 }
 
@@ -236,13 +292,13 @@ function DropdownItem({ icon: Icon, label, onClick, danger }) {
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
-function Navbar({ onLogout, theme, onToggleTheme, onMobileMenu }) {
-    const [profileOpen,   setProfileOpen]   = useState(false);
+function Navbar({ onLogout, theme, onToggleTheme }) {
+    const [profileOpen, setProfileOpen] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
     const dropdownRef = useRef(null);
-    const userEmail   = getUserEmail();
-    const initials    = getInitials(userEmail);
-    const { t }       = useI18n();
+    const userEmail = getUserEmail();
+    const initials = getInitials(userEmail);
+    const { t } = useI18n();
 
     useEffect(() => {
         const handler = (e) => {
@@ -265,24 +321,12 @@ function Navbar({ onLogout, theme, onToggleTheme, onMobileMenu }) {
 
             <div className="flex items-center gap-3 h-full px-5">
 
-                {/* Mobile hamburger — visible only on small screens, opens the nav drawer */}
-                <button
-                    onClick={onMobileMenu}
-                    className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl shrink-0
-                               dark:text-gray-400 text-gray-500
-                               dark:hover:bg-white/[0.05] hover:bg-gray-100
-                               transition-colors duration-150"
-                >
-                    <Menu size={18} />
-                </button>
-
                 {/* ── Search ── */}
                 <div className="relative flex-1 max-w-sm">
                     <Search
                         size={13}
-                        className={`absolute start-3.5 top-1/2 -translate-y-1/2 transition-colors duration-150 ${
-                            searchFocused ? "dark:text-red-400 text-red-500" : "dark:text-gray-600 text-gray-400"
-                        }`}
+                        className={`absolute start-3.5 top-1/2 -translate-y-1/2 transition-colors duration-150 ${searchFocused ? "dark:text-red-400 text-red-500" : "dark:text-gray-600 text-gray-400"
+                            }`}
                     />
                     <input
                         type="text"
@@ -332,7 +376,7 @@ function Navbar({ onLogout, theme, onToggleTheme, onMobileMenu }) {
                             dark:hover:bg-yellow-400/10 hover:bg-amber-50
                         "
                     >
-                        <span className={`absolute transition-all duration-300 ${theme === "dark"  ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}><Sun size={16} /></span>
+                        <span className={`absolute transition-all duration-300 ${theme === "dark" ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}><Sun size={16} /></span>
                         <span className={`absolute transition-all duration-300 ${theme === "light" ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}><Moon size={16} /></span>
                     </button>
 
@@ -417,7 +461,7 @@ function Navbar({ onLogout, theme, onToggleTheme, onMobileMenu }) {
                                     >
                                         <div className="flex items-center gap-3">
                                             {theme === "dark"
-                                                ? <Sun  size={14} className="text-yellow-400" />
+                                                ? <Sun size={14} className="text-yellow-400" />
                                                 : <Moon size={14} className="text-indigo-400" />
                                             }
                                             <span>{theme === "dark" ? t("layout.lightMode") : t("layout.darkMode")}</span>
@@ -434,7 +478,7 @@ function Navbar({ onLogout, theme, onToggleTheme, onMobileMenu }) {
                                 {/* Actions */}
                                 <div className="p-1.5">
                                     <DropdownItem icon={Settings} label={t("layout.settings")} />
-                                    <DropdownItem icon={LogOut}   label={t("layout.logout")} onClick={onLogout} danger />
+                                    <DropdownItem icon={LogOut} label={t("layout.logout")} onClick={onLogout} danger />
                                 </div>
                             </div>
                         )}
@@ -449,12 +493,10 @@ function Navbar({ onLogout, theme, onToggleTheme, onMobileMenu }) {
 
 export default function DashboardLayout() {
     const navigate = useNavigate();
-    const location = useLocation();
-    const [collapsed, setCollapsed] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
 
-    // Close the mobile drawer whenever the route changes
-    useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+    const token = getToken();
+    const role = getUserRole(token);
+    const [collapsed, setCollapsed] = useState(false);
 
     const [theme, setTheme] = useState(() =>
         localStorage.getItem("wasali-theme") || "dark"
@@ -479,21 +521,11 @@ export default function DashboardLayout() {
 
     return (
         <div className={`${theme === "dark" ? "dark" : ""} flex h-screen dark:bg-[#080808] bg-gray-50 overflow-hidden`}>
-            <Sidebar
-                collapsed={collapsed}
-                onToggle={() => setCollapsed((c) => !c)}
-                mobileOpen={mobileOpen}
-                onMobileClose={() => setMobileOpen(false)}
-            />
+            <Sidebar collapsed={collapsed} role={role} onToggle={() => setCollapsed((c) => !c)} />
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-                <Navbar
-                    onLogout={logout}
-                    theme={theme}
-                    onToggleTheme={toggleTheme}
-                    onMobileMenu={() => setMobileOpen((o) => !o)}
-                />
-                <main className="flex-1 overflow-y-auto overflow-x-hidden dark:bg-[#080808] bg-gray-50">
-                    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+                <Navbar onLogout={logout} theme={theme} onToggleTheme={toggleTheme} />
+                <main className="flex-1 overflow-y-auto dark:bg-[#080808] bg-gray-50">
+                    <div className="p-6 max-w-7xl mx-auto">
                         <Outlet />
                     </div>
                 </main>

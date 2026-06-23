@@ -202,7 +202,7 @@ function InputField({
 
 // ─── LoginScreen ──────────────────────────────────────────────────────────────
 export default function LoginScreen() {
-  const params = useLocalSearchParams<{ registered?: string }>();
+  const params = useLocalSearchParams<{ registered?: string; verified?: string }>();
 
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
@@ -210,7 +210,11 @@ export default function LoginScreen() {
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState<string | null>(null);
   const [successMsg] = useState<string | null>(
-    params.registered === '1' ? 'Compte créé avec succès, connectez-vous.' : null,
+    params.verified === '1'
+      ? 'Email vérifié ! Connectez-vous pour accéder à votre compte.'
+      : params.registered === '1'
+        ? 'Compte créé avec succès, connectez-vous.'
+        : null,
   );
 
   const passwordRef = useRef<RNTextInput>(null);
@@ -243,6 +247,13 @@ export default function LoginScreen() {
         (axiosErr.response
           ? `Erreur serveur (${axiosErr.response.status})`
           : `Serveur inaccessible — ${axiosErr.code ?? axiosErr.message}`);
+
+      if (msg.startsWith('EMAIL_NOT_VERIFIED:')) {
+        const unverifEmail = msg.slice('EMAIL_NOT_VERIFIED:'.length);
+        router.replace({ pathname: '/verify-otp', params: { email: unverifEmail } } as any);
+        return;
+      }
+
       setError(msg);
     } finally {
       setLoading(false);

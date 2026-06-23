@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class GpsServiceImpl implements GpsService {
 
     private final TrackingLocationRepository trackingLocationRepository;
@@ -75,6 +77,7 @@ public class GpsServiceImpl implements GpsService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public GpsLocationDTO getLatestLocation(UUID colisId) {
 

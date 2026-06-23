@@ -27,6 +27,8 @@ public class AdminInitializer {
                 admin.setEmail(adminEmail);
                 admin.setPassword(passwordEncoder.encode("Admin123!"));
                 admin.setRole(Role.ROLE_ADMIN);
+                admin.setEmailVerified(true);
+                admin.setEnabled(true);
 
                 userRepository.save(admin);
 

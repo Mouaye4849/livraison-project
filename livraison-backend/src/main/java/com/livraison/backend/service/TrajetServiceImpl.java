@@ -223,22 +223,40 @@ public class TrajetServiceImpl implements TrajetService {
         Trajet trajet = trajetRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Trajet introuvable"));
 
-        if (currentUser.getRole() != Role.ROLE_ADMIN &&
-                !trajet.getVoyageur().getId().equals(currentUser.getId())) {
+        boolean isAdmin = currentUser.getRole() == Role.ROLE_ADMIN;
+        boolean isOwner = trajet.getVoyageur().getId().equals(currentUser.getId());
+
+        if (!isAdmin && !isOwner) {
             throw new BusinessException("Accès refusé ❌");
         }
 
-        if (trajet.getColis() != null && !trajet.getColis().isEmpty()) {
-            throw new BusinessException("Trajet contient des colis ❌");
+        // Nobody can delete a trajet that is actively delivering
+        if (trajet.getStatut() == TrajetStatut.EN_COURS) {
+            throw new BusinessException("Impossible de supprimer un trajet en cours de livraison ❌");
         }
 
-        if (trajet.getStatut() == TrajetStatut.EN_COURS) {
-            throw new BusinessException("Trajet en cours ❌");
+        // Owner (non-admin) is blocked only when there are colis already accepted
+        // or being delivered — statuses that represent committed business operations.
+        // Admin can force-delete in any other situation.
+        if (!isAdmin) {
+            boolean hasActiveColis = trajet.getColis() != null &&
+                    trajet.getColis().stream().anyMatch(c ->
+                            c.getStatut() == StatutColis.ACCEPTE ||
+                            c.getStatut() == StatutColis.EN_COURS);
+            if (hasActiveColis) {
+                throw new BusinessException("Trajet contient des colis actifs — annulez-les d'abord ❌");
+            }
+        }
+
+        // Unlink colis from this trajet before deletion to satisfy the FK constraint.
+        // (Colis.trajet_id is nullable; @OneToMany has no cascade/orphanRemoval.)
+        if (trajet.getColis() != null && !trajet.getColis().isEmpty()) {
+            trajet.getColis().forEach(c -> c.setTrajet(null));
+            colisRepository.saveAll(trajet.getColis());
         }
 
         trajetRepository.delete(trajet);
 
-        // 📩 Notify voyageur
         notificationService.createNotification(
                 trajet.getVoyageur(),
                 "❌ Votre trajet a été supprimé",

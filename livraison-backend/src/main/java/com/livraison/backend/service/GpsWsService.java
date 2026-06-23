@@ -125,12 +125,15 @@ public class GpsWsService {
                         .longitude(payload.getLongitude())
                         .createdAt(now)
                         .build();
-                trackingLocationRepository.save(loc);
+                // saveAndFlush forces the INSERT SQL to execute immediately (inside the
+                // transaction, inside this try-catch) rather than deferring to commit time.
+                // This ensures any DB error is caught here, not silently at commit.
+                trackingLocationRepository.saveAndFlush(loc);
                 lastDbWriteMs.put(colisIdStr, nowMs);
-                log.debug("[GPS-WS] DB write: saved TrackingLocation for colis {}", colisId);
+                log.info("[GPS-WS] ✓ DB write: saved TrackingLocation for colis {}", colisId);
             } catch (Exception e) {
-                log.error("[GPS-WS] DB write FAILED for colis {} — {}", colisId, e.getMessage(), e);
-                // DB failure doesn't stop the STOMP broadcast — already sent above
+                log.error("[GPS-WS] ✗ DB write FAILED for colis {} — {}: {}",
+                        colisId, e.getClass().getSimpleName(), e.getMessage(), e);
             }
         } else {
             log.debug("[GPS-WS] DB write skipped (throttle: {}ms until next write)",

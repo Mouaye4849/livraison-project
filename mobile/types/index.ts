@@ -44,6 +44,21 @@ export interface AuthResponse {
   email: string;
 }
 
+export interface RegisterResponse {
+  requiresVerification: boolean;
+  email: string;
+  message: string;
+}
+
+export interface OtpVerifyRequest {
+  email: string;
+  code: string;
+}
+
+export interface OtpResendRequest {
+  email: string;
+}
+
 export interface StoredUser {
   email: string;
   role: UserRole;
