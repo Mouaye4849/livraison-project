@@ -145,6 +145,29 @@ export default function GpsMap({ colisId }) {
             });
     };
 
+    /* ── Polling fallback: retry REST every 15 s until GPS data arrives ─────── */
+    useEffect(() => {
+        if (!colisId) return;
+        // Only poll while we have no data yet. Once gpsData is set (either from REST
+        // or STOMP), the interval clears itself. This handles the race condition where
+        // the client opens the tracking page before the Voyageur's first GPS update
+        // is persisted to the DB.
+        const intervalId = setInterval(() => {
+            setGpsData(current => {
+                if (current) {
+                    clearInterval(intervalId);
+                    return current;
+                }
+                console.log(`[GPS-MAP] REST poll: no data yet, retrying…`);
+                fetchGps();
+                return current;
+            });
+        }, 15_000);
+
+        return () => clearInterval(intervalId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [colisId]);
+
     /* ── STOMP real-time subscription (unchanged logic) ─────────────────────── */
     useEffect(() => {
         if (!colisId) return;

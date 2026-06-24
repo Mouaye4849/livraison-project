@@ -640,4 +640,20 @@ export default {
     title: "Notifications",
     empty: "Aucune notification",
   },
+
+  otp: {
+    title: "Vérifiez votre email",
+    emailSentTo: "Nous avons envoyé un code de vérification à",
+    enterFullCode: "Veuillez entrer les 6 chiffres du code",
+    verify: "Vérifier",
+    loading: "Vérification en cours...",
+    noCode: "Vous n'avez pas reçu le code ?",
+    resend: "Renvoyer",
+    resendIn: "Renvoyer dans",
+    expiresIn: "Expire dans",
+    expired: "Code expiré. Cliquez sur « Renvoyer » pour obtenir un nouveau code.",
+    invalidCode: "Code incorrect. Veuillez réessayer.",
+    success: "Email vérifié avec succès ! Redirection...",
+    resendFailed: "Impossible d'envoyer un nouveau code. Réessayez.",
+  },
 };

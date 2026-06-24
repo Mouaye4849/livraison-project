@@ -21,6 +21,7 @@ export default function RootLayout() {
           <Stack.Screen name="(dashboard)"  options={{ headerShown: false }} />
           <Stack.Screen name="login"        options={{ headerShown: false }} />
           <Stack.Screen name="register"     options={{ headerShown: false }} />
+          <Stack.Screen name="verify-otp"   options={{ headerShown: false }} />
           <Stack.Screen name="modal"        options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />

@@ -34,6 +34,12 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    // Web OTP verification — true for all existing/mobile/Google users so they
+    // keep login access. Only web-registered accounts start as false until the
+    // 6-digit code is confirmed.
+    @Column(name = "email_verified", nullable = false, columnDefinition = "bit(1) default 1")
+    private boolean emailVerified = true;
+
     @OneToMany(mappedBy = "user")
     private List<Colis> colis;
 }

@@ -4,6 +4,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/registerPage";
 import Home from "./pages/Home";
 import PrivateRoute from "./components/PrivateRoute";
+import VoyageurRoute from "./components/VoyageurRoute";
+import UserRoute from "./components/UserRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import TrajetPage from "./pages/TrajetPage";
@@ -19,6 +21,7 @@ import Pay from "./pages/Pay";
 import ChatPage from "./pages/ChatPage";
 import MessagesPage from "./pages/MessagesPage";
 import TrackingPage from "./pages/TrackingPage";
+import VerifyOtpPage from "./pages/VerifyOtpPage";
 
 // 🛡 ADMIN (desktop)
 import AdminRoute from "./components/AdminRoute";
@@ -37,6 +40,7 @@ import AdminPanelHome from "./admin-panel/pages/AdminPanelHome";
 import AdminPanelColis from "./admin-panel/pages/AdminPanelColis";
 import AdminPanelUsers from "./admin-panel/pages/AdminPanelUsers";
 import AdminPanelTrajets from "./admin-panel/pages/AdminPanelTrajets";
+import { User } from "lucide-react";
 
 function App() {
   return (
@@ -47,6 +51,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-otp" element={<VerifyOtpPage />} />
 
 
         <Route
@@ -59,19 +64,19 @@ function App() {
         >
           <Route index element={<Dashboard />} />
 
-          <Route path="trajets" element={<TrajetsList />} />
-          <Route path="trajets/create" element={<TrajetPage />} />
-          <Route path="trajets/:id/edit" element={<EditTrajet />} />
+          <Route path="trajets" element={<VoyageurRoute><TrajetsList /></VoyageurRoute>} />
+          <Route path="trajets/create" element={<VoyageurRoute><TrajetPage /></VoyageurRoute>} />
+          <Route path="trajets/:id/edit" element={<VoyageurRoute><EditTrajet /></VoyageurRoute>} />
 
-          <Route path="colis/create" element={<CreateColis />} />
-          <Route path="colis/public" element={<PublicColis />} />
-          <Route path="my-colis" element={<MyColis />} />
+          <Route path="colis/create" element={<UserRoute><CreateColis /></UserRoute>} />
+          <Route path="colis/public" element={<VoyageurRoute><PublicColis /></VoyageurRoute>} />
+          <Route path="my-colis" element={<UserRoute><MyColis /></UserRoute>} />
 
-          <Route path="assign" element={<AssignColis />} />
-          <Route path="trajets/with-colis" element={<TrajetsWithColis />} />
+          <Route path="assign" element={<VoyageurRoute><AssignColis /></VoyageurRoute>} />
+          <Route path="trajets/with-colis" element={<VoyageurRoute><TrajetsWithColis /></VoyageurRoute>} />
 
           <Route path="payments" element={<MyPayments />} />
-          <Route path="pay/:colisId" element={<Pay />} />
+          <Route path="pay/:colisId" element={<UserRoute><Pay /></UserRoute>} />
           <Route path="chat/:colisId" element={<ChatPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="tracking/:colisId" element={<TrackingPage />} />
@@ -116,8 +121,8 @@ function App() {
           }
         >
           <Route index element={<AdminPanelHome />} />
-          <Route path="colis"   element={<AdminPanelColis />}   />
-          <Route path="users"   element={<AdminPanelUsers />}   />
+          <Route path="colis" element={<AdminPanelColis />} />
+          <Route path="users" element={<AdminPanelUsers />} />
           <Route path="trajets" element={<AdminPanelTrajets />} />
         </Route>
 

@@ -90,9 +90,6 @@ public class GlobalExceptionHandler {
     }
 
 
-    // Thrown by Spring/Tomcat when the uploaded file exceeds the configured limit.
-    // Without this handler the exception propagates before the controller runs,
-    // causing Tomcat to close the connection abruptly → "socket hang up" in Vite.
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
         ErrorResponse response = ErrorResponse.builder()
