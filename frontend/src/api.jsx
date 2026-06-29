@@ -3,7 +3,9 @@ import axios from "axios";
 // Use the Vite proxy (/api → http://localhost:8080/api).
 // This keeps all requests same-origin → no CORS, no preflight for PUT/DELETE.
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  baseURL: import.meta.env.DEV
+    ? "/api"
+    : `${import.meta.env.VITE_API_URL}/api`,
 });
 
 api.interceptors.request.use((config) => {
