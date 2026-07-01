@@ -351,8 +351,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {user?.role === "VOYAGEUR" &&
-        <TrajetsList />}
+
 
 
     </div>
