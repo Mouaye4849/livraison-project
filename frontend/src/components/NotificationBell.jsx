@@ -11,11 +11,11 @@ function encodeEmail(email) {
 
 export default function NotificationBell() {
     const [notifications, setNotifications] = useState([]);
-    const [unread, setUnread]   = useState(0);
-    const [open, setOpen]       = useState(false);
+    const [unread, setUnread] = useState(0);
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const containerRef  = useRef(null);
+    const containerRef = useRef(null);
     const stompClientRef = useRef(null);
 
     // ── Determine which endpoint to call based on role ─────────────────────────
@@ -56,7 +56,8 @@ export default function NotificationBell() {
         const client = new Client({
             // Use the Vite-proxied path so the request is same-origin (no CORS,
             // no direct connection to :8080, works in production behind a reverse proxy).
-            webSocketFactory: () => new SockJS("/chat"),
+            webSocketFactory: () =>
+                new SockJS("https://livraison-backend-j76m.onrender.com/chat"),
             reconnectDelay: 5_000,
             onConnect: () => {
                 client.subscribe(topic, (frame) => {
@@ -157,11 +158,10 @@ export default function NotificationBell() {
                                 <div
                                     key={n.id}
                                     onClick={() => n.statut !== "LU" && markAsRead(n.id)}
-                                    className={`p-3 rounded-lg transition text-sm ${
-                                        n.statut === "LU"
+                                    className={`p-3 rounded-lg transition text-sm ${n.statut === "LU"
                                             ? "dark:bg-white/5 bg-gray-50 text-gray-400 cursor-default"
                                             : "bg-blue-500/20 dark:text-white text-gray-900 hover:bg-blue-500/30 cursor-pointer"
-                                    }`}
+                                        }`}
                                 >
                                     <p className="leading-snug">{n.message}</p>
                                     <span className="text-xs text-gray-400 block mt-1">
