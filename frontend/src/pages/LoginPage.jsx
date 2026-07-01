@@ -29,6 +29,7 @@ export default function LoginPage() {
       console.log("LOGIN RESPONSE:", data);
       const token = data.token || data.accessToken;
 
+
       if (!token) throw new Error("Token not found in response");
 
       localStorage.setItem("token", token);
