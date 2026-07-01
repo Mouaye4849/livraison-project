@@ -68,8 +68,8 @@ function StatusBadge({ status }) {
   const { t } = useI18n();
   const map = {
     EN_COURS: { label: t("dashboard.statusInProgress"), cls: "bg-yellow-500/10 text-yellow-500 border-yellow-500/25" },
-    ACCEPTE:  { label: t("dashboard.statusAccepted"),  cls: "bg-blue-500/10  text-blue-500  border-blue-500/25"  },
-    LIVRE:    { label: t("dashboard.statusDelivered"),    cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25" },
+    ACCEPTE: { label: t("dashboard.statusAccepted"), cls: "bg-blue-500/10  text-blue-500  border-blue-500/25" },
+    LIVRE: { label: t("dashboard.statusDelivered"), cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25" },
   };
 
   const { label, cls } = map[status] ?? {
@@ -102,8 +102,8 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function Dashboard() {
   const { t } = useI18n();
-  const [orders, setOrders]     = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeBar, setActiveBar] = useState(null);
 
   useEffect(() => { fetchActiveColis(); }, []);
@@ -351,8 +351,9 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* ── Trajets ── */}
-      <TrajetsList />
+      {user?.role === "VOYAGEUR" &&
+        <TrajetsList />}
+
 
     </div>
   );
